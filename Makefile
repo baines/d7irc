@@ -1,16 +1,16 @@
 UI   := $(patsubst ui/%.ui,build/%_ui.h,$(wildcard ui/*.ui))
-SRCS := $(wildcard src/*.cpp) src/irc_moc.cpp
+SRCS := $(wildcard src/*.cpp) src/d7irc_qt.cpp
 HDRS := $(wildcard src/*.h)
 OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
 
-CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC\
+CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC -g\
  -I/usr/include/x86_64-linux-gnu/qt5/\
  -I/usr/include/x86_64-linux-gnu/qt5/QtCore\
  -I/usr/include/x86_64-linux-gnu/qt5/QtGui\
  -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets
 
 d7irc: $(OBJS)
-	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets
+	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lircclient
 
 build/%.o: src/%.cpp $(UI)
 	$(CXX) $(CFLAGS) -c $< -o $@
@@ -18,7 +18,7 @@ build/%.o: src/%.cpp $(UI)
 build/%_ui.h: ui/%.ui
 	uic $< -o $@
 
-src/%_moc.cpp: src/%_moc.h
+src/%_qt.cpp: src/%_qt.h
 	moc $< -o $@
 
 clean:

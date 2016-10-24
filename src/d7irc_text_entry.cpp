@@ -1,4 +1,4 @@
-#include "irc_moc.h"
+#include "d7irc_qt.h"
 
 IRCTextEntry::IRCTextEntry(QWidget*& w)
 : QTextEdit(w)
@@ -11,7 +11,7 @@ void IRCTextEntry::keyPressEvent(QKeyEvent* ev)
 {
 	if(ev->key() == Qt::Key_Return){
 		if(!(ev->modifiers() & Qt::ShiftModifier)){
-			emit textSubmit();
+//			emit textSubmit();
 			setMaximumHeight(minimumHeight());
 			clear();
 			line_count = 1;
