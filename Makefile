@@ -1,0 +1,27 @@
+UI   := $(patsubst ui/%.ui,build/%_ui.h,$(wildcard ui/*.ui))
+SRCS := $(wildcard src/*.cpp) src/irc_moc.cpp
+HDRS := $(wildcard src/*.h)
+OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
+
+CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC\
+ -I/usr/include/x86_64-linux-gnu/qt5/\
+ -I/usr/include/x86_64-linux-gnu/qt5/QtCore\
+ -I/usr/include/x86_64-linux-gnu/qt5/QtGui\
+ -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets
+
+d7irc: $(OBJS)
+	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets
+
+build/%.o: src/%.cpp $(UI)
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+build/%_ui.h: ui/%.ui
+	uic $< -o $@
+
+src/%_moc.cpp: src/%_moc.h
+	moc $< -o $@
+
+clean:
+	$(RM) build/*.h build/*.o d7irc
+
+.PHONY: clean
