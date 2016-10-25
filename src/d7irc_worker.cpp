@@ -5,14 +5,14 @@
 static std::unordered_set<irc_session_t*> servers;
 
 static void
-irc_cb(irc_session_t* s, const char* ev, const char* origin, const char** params, unsigned n)
+irc_cb(irc_session_t* s, const char* ev, const char* origin, const char** argv, unsigned n)
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 
 	QString str = QString::asprintf("[%s] [%s] :: ", ev, origin);
 	
 	for(unsigned i = 0; i < n; ++i){
-		str.append(params[i]);
+		str.append(argv[i]);
 		str.append(" :: ");
 	}
 
@@ -20,18 +20,36 @@ irc_cb(irc_session_t* s, const char* ev, const char* origin, const char** params
 }
 
 static void
-irc_cb2(irc_session_t* s, unsigned ev, const char* origin, const char** params, unsigned n)
+irc_cb2(irc_session_t* s, unsigned ev, const char* origin, const char** argv, unsigned n)
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 
 	QString str = QString::asprintf("[%u] [%s] :: ", ev, origin);
 	
 	for(unsigned i = 0; i < n; ++i){
-		str.append(params[i]);
+		str.append(argv[i]);
 		str.append(" :: ");
 	}
 
 	emit w->privmsg(str);
+}
+
+static void
+irc_connect(irc_session_t* s, const char* ev, const char* origin, const char** argv, unsigned n)
+{
+	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
+	emit w->connect(w->server);
+
+	irc_cmd_join(s, "#test", NULL);
+}
+
+static void
+irc_join(irc_session_t* s, const char* ev, const char* origin, const char** argv, unsigned n)
+{
+	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
+	QString chan(argv[0]);
+	printf("join: %s %s\n", w->server.toUtf8().constData(), argv[0]);
+	emit w->join(w->server, chan);
 }
 
 IRCWorker::IRCWorker(QThread* thread)
@@ -44,10 +62,10 @@ void IRCWorker::begin()
 {
 	// set up irc_stuff
 	irc_callbacks_t cb = {};
-	cb.event_connect = irc_cb;
+	cb.event_connect = irc_connect;
 	cb.event_channel = irc_cb;
 	cb.event_privmsg = irc_cb;
-	cb.event_join = irc_cb;
+	cb.event_join = irc_join;
 	cb.event_part = irc_cb;
 	cb.event_nick = irc_cb;
 	cb.event_ctcp_action = irc_cb;
@@ -69,10 +87,11 @@ void IRCWorker::begin()
 	}
 
 	emit privmsg("Connecting...");
+	server = "127.0.0.1";
 
 	// TODO: this sucks, find a better way. maybe QSocketNotifier can be hacked in somehow
 	timer = new QTimer;
-	connect(timer, &QTimer::timeout, this, &IRCWorker::tick);
+	QObject::connect(timer, &QTimer::timeout, this, &IRCWorker::tick);
 	timer->start(100);
 }
 

@@ -16,10 +16,19 @@ int main(int argc, char** argv){
 	QObject::connect(worker, &IRCWorker::privmsg, ui.chat_lines, &QTextEdit::append);
 	QObject::connect(irc_thread, &QThread::started, worker, &IRCWorker::begin);
 
-//	QObject::connect(ui.text_input, &IRCTextEntry::textSubmit, worker, &
+	IRCModel model;
+
+	QObject::connect(worker, &IRCWorker::connect, &model, &IRCModel::addServer, Qt::QueuedConnection);
+	QObject::connect(worker, &IRCWorker::join, &model, &IRCModel::addChannel, Qt::QueuedConnection);
+
+	QObject::connect(&model, &IRCModel::serverAdded, ui.nick_list, &QTreeView::expand, Qt::QueuedConnection);
+
+	WTFINeedThisJustToSetTheRowHeight wtf;
+	ui.nick_list->header()->hide();
+	ui.nick_list->setModel(&model);
+	ui.nick_list->setItemDelegate(&wtf);
 
 	irc_thread->start();
-
 	win->show();
 	return app.exec();
 }
