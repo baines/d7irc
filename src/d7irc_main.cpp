@@ -21,12 +21,12 @@ int main(int argc, char** argv){
 	QObject::connect(worker, &IRCWorker::connect, &model, &IRCModel::addServer, Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::join, &model, &IRCModel::addChannel, Qt::QueuedConnection);
 
-	QObject::connect(&model, &IRCModel::serverAdded, ui.nick_list, &QTreeView::expand, Qt::QueuedConnection);
+	QObject::connect(&model, &IRCModel::serverAdded, ui.serv_list, &QTreeView::expand, Qt::QueuedConnection);
 
-	WTFINeedThisJustToSetTheRowHeight wtf;
-	ui.nick_list->header()->hide();
-	ui.nick_list->setModel(&model);
-	ui.nick_list->setItemDelegate(&wtf);
+	ui.serv_list->header()->hide();
+	ui.serv_list->setModel(&model);
+
+	// TODO: connect worker join to serv_list select
 
 	irc_thread->start();
 	win->show();

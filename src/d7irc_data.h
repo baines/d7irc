@@ -3,6 +3,7 @@
 #include <qtextdocument.h>
 #include <qstring.h>
 #include <vector>
+#include "d7irc_qt.h"
 
 enum IRCUserFlags : unsigned {
 	IRC_USR_OP    = (1 << 0),
@@ -25,7 +26,7 @@ struct IRCBuffer {
 	IRCBufferType type;
 	QString name;
 	QTextDocument* contents;
-//	std::vector<IRCUser> nicks;
+	IRCNicksModel nicks;
 
 	IRCBuffer* parent;
 	IRCBuffer* child;

@@ -9,7 +9,7 @@ irc_cb(irc_session_t* s, const char* ev, const char* origin, const char** argv, 
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 
-	QString str = QString::asprintf("[%s] [%s] :: ", ev, origin);
+	QString str;// = QString::asprintf("[%s] [%s] :: ", ev, origin);
 	
 	for(unsigned i = 0; i < n; ++i){
 		str.append(argv[i]);
@@ -24,11 +24,10 @@ irc_cb2(irc_session_t* s, unsigned ev, const char* origin, const char** argv, un
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 
-	QString str = QString::asprintf("[%u] [%s] :: ", ev, origin);
+	QString str;// = QString::asprintf("[%u] [%s] :: ", ev, origin);
 	
-	for(unsigned i = 0; i < n; ++i){
+	for(unsigned i = 1; i < n; ++i){
 		str.append(argv[i]);
-		str.append(" :: ");
 	}
 
 	emit w->privmsg(str);

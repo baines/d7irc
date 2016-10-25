@@ -1,6 +1,5 @@
 #ifndef D7IRC_QT_H
 #define D7IRC_QT_H
-#include "d7irc_data.h"
 #include <qevent.h>
 #include <qtextedit.h>
 #include <qobject.h>
@@ -10,6 +9,8 @@
 #include <qabstractitemview.h>
 #include <qitemdelegate.h>
 #include <libircclient.h>
+
+struct IRCBuffer;
 
 
 class IRCTextEntry : public QTextEdit {
@@ -60,10 +61,31 @@ public:
 
 	IRCBuffer* addServer  (const QString& name);
 	IRCBuffer* addChannel (const QString& serv, const QString& chan);
+
+	void addNick (const QString& serv, const QString& chan, const QString& nick);
+	void delNick (const QString& serv, const QString& chan, const QString& nick);
+
 signals:
 	void serverAdded (const QModelIndex& idx);
 private:
 	IRCBuffer* root;
+};
+
+
+class IRCNicksModel : public QAbstractListModel {
+	Q_OBJECT;
+public:
+	IRCNicksModel();
+
+	int rowCount  (const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
+
+	void addNick (const QString& nick);
+	void delNick (const QString& nick);
+
+	void changeNick (const QString& from, const QString& to);
+private:
+	std::vector<QString> nicks;
 };
 
 
@@ -76,15 +98,6 @@ public slots:
 //	void delChannel(int serv_id, const QString& chan);
 //	void goToChannel(const QString& chan); // int id instead?
 //
-};
-
-
-struct WTFINeedThisJustToSetTheRowHeight : public QItemDelegate {
-	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-		QSize sz = QItemDelegate::sizeHint(option, index);
-		sz.setHeight(20);
-		return sz;
-	}
 };
 
 // TODO: thread for curl_multi to get images / code snippets

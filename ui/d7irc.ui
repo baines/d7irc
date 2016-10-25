@@ -286,6 +286,12 @@ selection-color: #fff;</string>
     </item>
     <item>
      <widget class="QWidget" name="container_side" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="spacing">
         <number>2</number>
@@ -303,17 +309,67 @@ selection-color: #fff;</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QTreeView" name="nick_list">
+        <widget class="QTreeView" name="serv_list">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>150</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #fff;
+background-color: #17171A;
+font: 9pt &quot;DejaVu Sans Mono&quot;;
+selection-background-color: rgb(85, 85, 127);
+selection-color: #fff;</string>
+         </property>
+         <property name="indentation">
+          <number>10</number>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="headerHidden">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="nick_list">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>150</width>
-           <height>16777215</height>
+           <height>16777214</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -326,15 +382,24 @@ selection-color: #fff;</string>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="buttons" stretch="0">
-         <property name="spacing">
-          <number>2</number>
-         </property>
+        <layout class="QVBoxLayout" name="corner">
          <item>
           <widget class="QLabel" name="nick_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>0</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
              <height>54</height>
             </size>
            </property>
@@ -343,7 +408,7 @@ selection-color: #fff;</string>
 font: 9pt &quot;DejaVu Sans Mono&quot;;</string>
            </property>
            <property name="text">
-            <string>[ d7irc ]</string>
+            <string>[ d7 ]</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

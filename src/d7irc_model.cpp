@@ -1,4 +1,4 @@
-#include "d7irc_qt.h"
+#include "d7irc_data.h"
 
 IRCModel::IRCModel()
 : root(new IRCBuffer()){
@@ -8,7 +8,7 @@ IRCModel::IRCModel()
 	
 	root->child = new IRCBuffer();
 	root->child->type = IRC_BUF_INTERNAL;
-	root->child->name = "d7irc";
+	root->child->name = "SamuraIRC";
 	root->child->parent = root;
 
 	endInsertRows();
@@ -91,12 +91,26 @@ QVariant IRCModel::data(const QModelIndex& idx, int role) const {
 		return QVariant();
 	}
 
-	if(role != Qt::DisplayRole){
-		return QVariant();
-	}
-
 	const IRCBuffer* p = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
-	return QVariant(p->name);
+
+	switch(role){
+		case Qt::DisplayRole:
+			return QVariant(p->name);
+		case Qt::SizeHintRole:
+			return QVariant(QSize(-1, 20));
+		case Qt::ForegroundRole: {
+			// TODO: color palette
+			if(p->type == IRC_BUF_INTERNAL){
+				return QVariant(QBrush(QColor(150, 100, 255)));
+			} else if(p->type == IRC_BUF_SERVER){
+				return QVariant(QBrush(QColor(100, 255, 100)));
+			} else {
+				return QVariant();
+			}
+		}
+		default:
+			return QVariant();
+	} 
 }
 
 Qt::ItemFlags IRCModel::flags(const QModelIndex& idx) const {
