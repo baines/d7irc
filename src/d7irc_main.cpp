@@ -10,23 +10,27 @@ int main(int argc, char** argv){
 	Ui::SamuraIRC ui;
 	ui.setupUi(win);
 
+	IRCGUILogic ui_logic(&ui);
+
 	QThread* irc_thread = new QThread;
 	IRCWorker* worker = new IRCWorker(irc_thread);
 
 	QObject::connect(worker, &IRCWorker::privmsg, ui.chat_lines, &QTextEdit::append);
 	QObject::connect(irc_thread, &QThread::started, worker, &IRCWorker::begin);
 
-	IRCModel model;
+	IRCBufferModel buffers(ui.chat_lines, ui.serv_list);
 
-	QObject::connect(worker, &IRCWorker::connect, &model, &IRCModel::addServer, Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::join, &model, &IRCModel::addChannel, Qt::QueuedConnection);
+	QObject::connect(worker, &IRCWorker::connect, &buffers, &IRCBufferModel::addServer, Qt::QueuedConnection);
+	QObject::connect(worker, &IRCWorker::join, &buffers, &IRCBufferModel::addChannel, Qt::QueuedConnection);
 
-	QObject::connect(&model, &IRCModel::serverAdded, ui.serv_list, &QTreeView::expand, Qt::QueuedConnection);
-
-	ui.serv_list->header()->hide();
-	ui.serv_list->setModel(&model);
+	QObject::connect(&buffers, &IRCBufferModel::serverAdded, ui.serv_list, &QTreeView::expand, Qt::QueuedConnection);
 
 	// TODO: connect worker join to serv_list select
+
+	QObject::connect(
+		ui.serv_list->selectionModel(), &QItemSelectionModel::currentChanged,
+		&ui_logic, &IRCGUILogic::bufferChange
+	);
 
 	irc_thread->start();
 	win->show();

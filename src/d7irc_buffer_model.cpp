@@ -1,20 +1,28 @@
 #include "d7irc_data.h"
+#include <qtreeview.h>
 
-IRCModel::IRCModel()
+IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
 : root(new IRCBuffer()){
 	root->type  = IRC_BUF_INTERNAL;
 
 	beginInsertRows(QModelIndex(), 0, 0);
 	
 	root->child = new IRCBuffer();
-	root->child->type = IRC_BUF_INTERNAL;
-	root->child->name = "SamuraIRC";
 	root->child->parent = root;
 
+	root->child->type = IRC_BUF_INTERNAL;
+	root->child->name = "SamuraIRC";
+	root->child->contents = new QTextDocument;
+
 	endInsertRows();
+
+	edit->setDocument(root->child->contents);
+
+	view->setModel(this);
+	view->setCurrentIndex(createIndex(0, 0, root->child));
 }
 
-QModelIndex IRCModel::index(int row, int col, const QModelIndex& parent) const {
+QModelIndex IRCBufferModel::index(int row, int col, const QModelIndex& parent) const {
 
 	if(!hasIndex(row, col, parent)){
 		return QModelIndex();
@@ -39,7 +47,7 @@ QModelIndex IRCModel::index(int row, int col, const QModelIndex& parent) const {
 	}
 }
 
-QModelIndex IRCModel::parent(const QModelIndex& idx) const {
+QModelIndex IRCBufferModel::parent(const QModelIndex& idx) const {
 
 	if(!idx.isValid()){
 		return QModelIndex();
@@ -62,7 +70,7 @@ QModelIndex IRCModel::parent(const QModelIndex& idx) const {
 	return createIndex(row, 0, buf->parent);
 }
 
-int IRCModel::rowCount(const QModelIndex& parent) const {
+int IRCBufferModel::rowCount(const QModelIndex& parent) const {
 	IRCBuffer* p;
 
 	if(!parent.isValid()){
@@ -81,11 +89,11 @@ int IRCModel::rowCount(const QModelIndex& parent) const {
 	return count;
 }
 
-int IRCModel::columnCount(const QModelIndex& parent) const {
+int IRCBufferModel::columnCount(const QModelIndex& parent) const {
 	return 1;
 }
 
-QVariant IRCModel::data(const QModelIndex& idx, int role) const {
+QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 
 	if(!idx.isValid()){
 		return QVariant();
@@ -113,7 +121,7 @@ QVariant IRCModel::data(const QModelIndex& idx, int role) const {
 	} 
 }
 
-Qt::ItemFlags IRCModel::flags(const QModelIndex& idx) const {
+Qt::ItemFlags IRCBufferModel::flags(const QModelIndex& idx) const {
 	if(!idx.isValid()){
 		return 0;
 	}
@@ -121,7 +129,7 @@ Qt::ItemFlags IRCModel::flags(const QModelIndex& idx) const {
 	return QAbstractItemModel::flags(idx);
 }
 
-IRCBuffer* IRCModel::addServer(const QString& name){
+IRCBuffer* IRCBufferModel::addServer(const QString& name){
 
 	IRCBuffer* p = root->child;
 	while(p){
@@ -133,7 +141,7 @@ IRCBuffer* IRCModel::addServer(const QString& name){
 
 	buf->type = IRC_BUF_SERVER;
 	buf->name = name;
-//	buf->contents
+	buf->contents = new QTextDocument;
 //	buf->nicks
 
 	buf->parent = root;
@@ -160,7 +168,7 @@ IRCBuffer* IRCModel::addServer(const QString& name){
 	return buf;
 }
 
-IRCBuffer* IRCModel::addChannel(const QString& serv, const QString& chan){
+IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 	
 	IRCBuffer* s = addServer(serv);
 	IRCBuffer* p = s->child;
@@ -174,6 +182,7 @@ IRCBuffer* IRCModel::addChannel(const QString& serv, const QString& chan){
 
 	buf->type = IRC_BUF_CHANNEL;
 	buf->name = chan;
+	buf->contents = new QTextDocument;
 	buf->parent = s;
 
 	int row = 1;

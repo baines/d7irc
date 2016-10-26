@@ -26,7 +26,7 @@ struct IRCBuffer {
 	IRCBufferType type;
 	QString name;
 	QTextDocument* contents;
-	IRCNicksModel nicks;
+	IRCUserModel nicks;
 
 	IRCBuffer* parent;
 	IRCBuffer* child;

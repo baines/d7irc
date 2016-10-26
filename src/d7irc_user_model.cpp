@@ -6,15 +6,15 @@ static QVariant color_hash(const QString& str){
 	return QVariant(c);
 }
 
-IRCNicksModel::IRCNicksModel() {
+IRCUserModel::IRCUserModel() {
 
 }
 
-int IRCNicksModel::rowCount(const QModelIndex& parent) const {
+int IRCUserModel::rowCount(const QModelIndex& parent) const {
 	return nicks.size();
 }
 
-QVariant IRCNicksModel::data(const QModelIndex& idx, int role) const {
+QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 	if(idx.row() < 0 || idx.row() >= nicks.size()){
 		return QVariant();
 	}
@@ -31,14 +31,14 @@ QVariant IRCNicksModel::data(const QModelIndex& idx, int role) const {
 	}
 }
 
-void IRCNicksModel::addNick(const QString& nick) {
+void IRCUserModel::addNick(const QString& nick) {
 
 }
 
-void IRCNicksModel::delNick(const QString& nick) {
+void IRCUserModel::delNick(const QString& nick) {
 
 }
 
-void IRCNicksModel::changeNick(const QString& from, const QString& to) {
+void IRCUserModel::changeNick(const QString& from, const QString& to) {
 
 }

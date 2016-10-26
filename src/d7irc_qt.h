@@ -8,10 +8,14 @@
 #include <qabstractitemmodel.h>
 #include <qabstractitemview.h>
 #include <qitemdelegate.h>
+#include <qtreeview.h>
 #include <libircclient.h>
 
 struct IRCBuffer;
 
+namespace Ui {
+	class SamuraIRC;
+};
 
 class IRCTextEntry : public QTextEdit {
 	Q_OBJECT;
@@ -47,10 +51,10 @@ private:
 };
 
 
-class IRCModel : public QAbstractItemModel {
+class IRCBufferModel : public QAbstractItemModel {
 	Q_OBJECT;
 public:
-	IRCModel();
+	IRCBufferModel(QTextEdit* edit, QTreeView* view);
 	
 	QModelIndex index   (int row, int col, const QModelIndex& parent = QModelIndex()) const override;
 	QModelIndex parent  (const QModelIndex& idx) const override;
@@ -72,10 +76,10 @@ private:
 };
 
 
-class IRCNicksModel : public QAbstractListModel {
+class IRCUserModel : public QAbstractListModel {
 	Q_OBJECT;
 public:
-	IRCNicksModel();
+	IRCUserModel();
 
 	int rowCount  (const QModelIndex& parent = QModelIndex()) const override;
 	QVariant data (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
@@ -89,15 +93,14 @@ private:
 };
 
 
-class IRCController : public QObject {
+class IRCGUILogic : public QObject {
 	Q_OBJECT;
 public:
-	IRCController() = default;
+	IRCGUILogic(Ui::SamuraIRC* ui);
 public slots:
-//	void addChannel(int serv_id, const QString& chan);
-//	void delChannel(int serv_id, const QString& chan);
-//	void goToChannel(const QString& chan); // int id instead?
-//
+	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
+private:
+	Ui::SamuraIRC* ui;
 };
 
 // TODO: thread for curl_multi to get images / code snippets
