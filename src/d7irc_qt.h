@@ -36,10 +36,13 @@ public:
 	IRCWorker(QThread* thread);
 	QString server;
 signals:
-	void privmsg (const QString& text);
 	void connect (const QString& serv);
-	void join    (const QString& nick, const QString& chan);
-	void part    (const QString& nick, const QString& chan);
+	void join    (const QString& serv, const QString& chan, const QString& user);
+	void part    (const QString& serv, const QString& chan, const QString& user);
+	void quit    (const QString& serv, const QString& user, const QString& msg);
+	void privmsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
+	void nick    (const QString& serv, const QString& user, const QString& new_nick);
+	void numeric (const QString& serv, unsigned event, const QStringList& data);
 public slots:
 	void begin();
 	void tick();
@@ -66,8 +69,9 @@ public:
 	IRCBuffer* addServer  (const QString& name);
 	IRCBuffer* addChannel (const QString& serv, const QString& chan);
 
-	void addNick (const QString& serv, const QString& chan, const QString& nick);
-	void delNick (const QString& serv, const QString& chan, const QString& nick);
+	IRCBuffer* findServer  (const QString& name);
+	IRCBuffer* findChannel (const QString& serv, const QString& chan);
+	IRCBuffer* getDefault  ();
 
 signals:
 	void serverAdded (const QModelIndex& idx);
@@ -86,8 +90,6 @@ public:
 
 	void addNick (const QString& nick);
 	void delNick (const QString& nick);
-
-	void changeNick (const QString& from, const QString& to);
 private:
 	std::vector<QString> nicks;
 };
@@ -99,8 +101,29 @@ public:
 	IRCGUILogic(Ui::SamuraIRC* ui);
 public slots:
 	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
+//	bold/italic/etc buttons
+//  context menus
+//  click name to get settings / change name?
 private:
 	Ui::SamuraIRC* ui;
+};
+
+
+class IRCMessageHandler : public QObject {
+	Q_OBJECT;
+public:
+	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui);
+public slots:
+	void handleIRCConnect (const QString& serv);
+	void handleIRCJoin    (const QString& serv, const QString& chan, const QString& user);
+	void handleIRCPart    (const QString& serv, const QString& chan, const QString& user);
+	void handleIRCQuit    (const QString& serv, const QString& user, const QString& msg);
+	void handleIRCNick    (const QString& serv, const QString& user, const QString& new_nick);
+	void handleIRCPrivMsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
+	void handleIRCNumeric (const QString& serv, uint32_t event, const QStringList& data);
+private:
+	IRCBufferModel* buf_model;
+	Ui::SamuraIRC*  ui;
 };
 
 // TODO: thread for curl_multi to get images / code snippets

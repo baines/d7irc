@@ -23,6 +23,11 @@ enum IRCBufferType : int {
 };
 
 struct IRCBuffer {
+
+	IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent);
+
+	void addLine(const QString& prefix, const QString& msg);
+
 	IRCBufferType type;
 	QString name;
 	QTextDocument* contents;
@@ -32,6 +37,7 @@ struct IRCBuffer {
 	IRCBuffer* child;
 	IRCBuffer* sibling;
 
+	QTextCursor cursor;
 };
 
 #endif

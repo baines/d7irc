@@ -39,6 +39,3 @@ void IRCUserModel::delNick(const QString& nick) {
 
 }
 
-void IRCUserModel::changeNick(const QString& from, const QString& to) {
-
-}

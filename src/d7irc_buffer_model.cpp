@@ -2,18 +2,10 @@
 #include <qtreeview.h>
 
 IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
-: root(new IRCBuffer()){
-	root->type  = IRC_BUF_INTERNAL;
-
-	beginInsertRows(QModelIndex(), 0, 0);
+: root(new IRCBuffer(IRC_BUF_INTERNAL, "root", nullptr)){
 	
-	root->child = new IRCBuffer();
-	root->child->parent = root;
-
-	root->child->type = IRC_BUF_INTERNAL;
-	root->child->name = "SamuraIRC";
-	root->child->contents = new QTextDocument;
-
+	beginInsertRows(QModelIndex(), 0, 0);
+	root->child = new IRCBuffer(IRC_BUF_INTERNAL, "SamuraIRC", root);
 	endInsertRows();
 
 	edit->setDocument(root->child->contents);
@@ -137,14 +129,7 @@ IRCBuffer* IRCBufferModel::addServer(const QString& name){
 		p = p->sibling;
 	}
 
-	IRCBuffer* buf = new IRCBuffer();
-
-	buf->type = IRC_BUF_SERVER;
-	buf->name = name;
-	buf->contents = new QTextDocument;
-//	buf->nicks
-
-	buf->parent = root;
+	IRCBuffer* buf = new IRCBuffer(IRC_BUF_SERVER, name, root);
 
 	int row = 1;
 
@@ -178,12 +163,7 @@ IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 		p = p->sibling;
 	}
 
-	IRCBuffer* buf = new IRCBuffer();
-
-	buf->type = IRC_BUF_CHANNEL;
-	buf->name = chan;
-	buf->contents = new QTextDocument;
-	buf->parent = s;
+	IRCBuffer* buf = new IRCBuffer(IRC_BUF_CHANNEL, chan, s);
 
 	int row = 1;
 

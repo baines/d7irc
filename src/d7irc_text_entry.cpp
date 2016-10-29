@@ -9,6 +9,8 @@ IRCTextEntry::IRCTextEntry(QWidget*& w)
 
 void IRCTextEntry::keyPressEvent(QKeyEvent* ev)
 {
+	// TODO: parse commands in here
+
 	if(ev->key() == Qt::Key_Return){
 		if(!(ev->modifiers() & Qt::ShiftModifier)){
 //			emit textSubmit();
