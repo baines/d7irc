@@ -9,7 +9,10 @@ irc_connect(irc_session_t* s, const char*, const char* origin, const char** argv
 	emit w->connect(w->server);
 
 	// XXX remove later
-	irc_cmd_join(s, "#test", NULL);
+	irc_cmd_join(s, "#random", NULL);
+	irc_cmd_join(s, "#dev", NULL);
+	irc_cmd_join(s, "#hmn", NULL);
+	irc_cmd_join(s, "#hero", NULL);
 }
 
 static void
@@ -87,17 +90,16 @@ IRCWorker::IRCWorker(QThread* thread)
 // probably pass in server name / other params
 void IRCWorker::begin()
 {
-	// set up irc_stuff
-	irc_callbacks_t cb = {};
-	cb.event_connect = irc_connect;
-	cb.event_channel = irc_privmsg;
-	cb.event_privmsg = irc_privmsg;
-	cb.event_join = irc_join;
-	cb.event_part = irc_part;
-	cb.event_nick = irc_nick;
+	irc_callbacks_t cb   = {};
+	cb.event_connect     = irc_connect;
+	cb.event_channel     = irc_privmsg;
+	cb.event_privmsg     = irc_privmsg;
+	cb.event_join        = irc_join;
+	cb.event_part        = irc_part;
+	cb.event_nick        = irc_nick;
 //	cb.event_ctcp_action = irc_cb;
-//	cb.event_unknown = irc_cb;
-	cb.event_numeric = irc_numeric;
+//	cb.event_unknown     = irc_cb;
+	cb.event_numeric     = irc_numeric;
 
 	irc_session = irc_create_session(&cb);
 	if(!irc_session){
@@ -105,24 +107,26 @@ void IRCWorker::begin()
 		return;
 	}
 
+//	const char* temp_connect = "irc.handmade.network";
+	const char* temp_connect = "127.0.0.1";
+	const char* temp_name = "d12ninja";
+
+	server = temp_connect;
+
 	irc_set_ctx(irc_session, this);
 
-	if(irc_connect(irc_session, "127.0.0.1", 6667, NULL, "d7", "d7", "d7") != 0){
+	if(irc_connect(irc_session, temp_connect, 7666, NULL, temp_name, temp_name, temp_name) != 0){
 		puts("fix me 2");
 		return;
 	}
 
-//	emit privmsg("127.0.0.1""Connecting...");
-	server = "127.0.0.1";
-
-	// TODO: this sucks, find a better way. maybe QSocketNotifier can be hacked in somehow
-	timer = new QTimer;
-	QObject::connect(timer, &QTimer::timeout, this, &IRCWorker::tick);
-	timer->start(100);
+	tick();
 }
 
 void IRCWorker::tick()
 {
+	puts("tick");
+
 	int max_fd = 0;
 	fd_set in, out;
 	FD_ZERO(&in);
@@ -144,14 +148,40 @@ void IRCWorker::tick()
 	} else {
 		perror("select");
 	}
+
+	max_fd = 0;
+	FD_ZERO(&in);
+	FD_ZERO(&out);
+
+	if(irc_add_select_descriptors(irc_session, &in, &out, &max_fd) != 0){
+		fprintf(stderr, "Error adding select fds: %s\n", irc_strerror(irc_errno(irc_session)));
+	}
+
+	notifiers.clear();
+
+	for(int i = 3; i <= max_fd; ++i){
+		if(FD_ISSET(i, &in)){
+			auto* q =  new QSocketNotifier(i, QSocketNotifier::Read);
+			QObject::connect(q, &QSocketNotifier::activated, this, &IRCWorker::tick);
+			notifiers.emplace_back(q);
+		}
+		if(FD_ISSET(i, &out)){
+			auto* q =  new QSocketNotifier(i, QSocketNotifier::Write);
+			QObject::connect(q, &QSocketNotifier::activated, this, &IRCWorker::tick);
+			notifiers.emplace_back(q);
+		}
+	}
+
 }
 
 void IRCWorker::sendPrivmsg(const QString& target, const QString& msg)
 {
 	irc_cmd_msg(irc_session, target.toUtf8().constData(), msg.toUtf8().constData());
+	tick();
 }
 
 void IRCWorker::sendRaw(const QString& msg)
 {
 	irc_send_raw(irc_session, "%s", msg.toUtf8().constData());
+	tick();
 }

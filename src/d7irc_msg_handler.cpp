@@ -1,5 +1,7 @@
 #include "d7irc_data.h"
+#include "d7irc_ui.h"
 #include <libircclient.h>
+#include <libirc_rfcnumeric.h>
 
 IRCMessageHandler::IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui)
 : buf_model(model)
@@ -14,13 +16,13 @@ void IRCMessageHandler::handleIRCConnect(const QString& serv){
 void IRCMessageHandler::handleIRCJoin(const QString& serv, const QString& chan, const QString& user){
 	IRCBuffer* buf = buf_model->addChannel(serv, chan);
 	buf->addLine("-->", user);
-	buf->nicks.addNick(user);
+	buf->nicks.add(user);
 }
 
 void IRCMessageHandler::handleIRCPart(const QString& serv, const QString& chan, const QString& user){
 	IRCBuffer* buf = buf_model->addChannel(serv, chan);
 	buf->addLine("<--", user);
-	buf->nicks.delNick(user);
+	buf->nicks.del(user);
 }
 
 void IRCMessageHandler::handleIRCQuit(const QString& serv, const QString& user, const QString& msg){
@@ -31,13 +33,13 @@ void IRCMessageHandler::handleIRCQuit(const QString& serv, const QString& user, 
 	}
 
 	buf->addLine("", text);
-	buf->nicks.delNick(user);
+	buf->nicks.del(user);
 }
 
 void IRCMessageHandler::handleIRCNick(const QString& serv, const QString& user, const QString& new_nick){
 	IRCBuffer* buf = buf_model->addServer(serv);
-	buf->nicks.delNick(user);
-	buf->nicks.addNick(new_nick);
+	buf->nicks.del(user);
+	buf->nicks.add(new_nick);
 }
 
 void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& from, const QString& to, const QString& msg){
@@ -55,7 +57,53 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 	buf->addLine(nick, msg);
 }
 
-void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, const QStringList& data){
+static const char nick_start_symbols[] = "[]\\`_^{|}";
 
+void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, const QStringList& data){
+	switch(event){
+		case LIBIRC_RFC_RPL_NAMREPLY: {
+			puts("derp");
+			if(data.size() < 4) break;
+			puts("herp");
+
+			QStringList names = data[3].split(' ', QString::SkipEmptyParts);
+			IRCBuffer* buf = buf_model->addChannel(serv, data[2]);
+
+			for(int i = 0; i < names.size(); ++i){
+				const char* str = names[i].toUtf8().constData();
+				printf("str %d = %s\n", i, str);
+
+				if(!isalpha(*str) && !strchr(nick_start_symbols, *str)){
+					printf("adding %s\n", str + 1);
+					buf->nicks.add(str + 1);
+				} else {
+					printf("adding22 %s\n", str);
+					buf->nicks.add(names[i]);
+				}
+			}
+
+		} break;
+	}
 }
 
+void IRCMessageHandler::sendIRCMessage(const QString& str){
+	QModelIndex idx = ui->serv_list->currentIndex();
+	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
+	
+	// TODO: server - buffer association
+
+	switch(buf->type){
+		case IRC_BUF_INTERNAL: {
+			buf->addLine("", "This space intentionally left blank");
+		} break;
+
+		case IRC_BUF_SERVER: {
+			buf->addLine("", "Say something in a channel instead, would you?");
+		} break;
+
+		case IRC_BUF_CHANNEL: {
+			emit tempSend(buf->name, str);
+			buf->addLine("d12ninja", str);
+		} break;
+	}
+}

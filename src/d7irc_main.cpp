@@ -44,13 +44,17 @@ int main(int argc, char** argv){
 	IRCBufferModel buffers(ui.chat_lines, ui.serv_list);
 
 	IRCMessageHandler handler(&buffers, &ui);
-
 	QObject::connect(worker, &IRCWorker::connect, &handler, &IRCMessageHandler::handleIRCConnect, Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::join   , &handler, &IRCMessageHandler::handleIRCJoin   , Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::part   , &handler, &IRCMessageHandler::handleIRCPart   , Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::quit   , &handler, &IRCMessageHandler::handleIRCQuit   , Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::privmsg, &handler, &IRCMessageHandler::handleIRCPrivMsg, Qt::QueuedConnection);
+	QObject::connect(worker, &IRCWorker::numeric, &handler, &IRCMessageHandler::handleIRCNumeric, Qt::QueuedConnection);
 
+	QObject::connect(ui.text_input, &IRCTextEntry::textSubmit, &handler, &IRCMessageHandler::sendIRCMessage);
+
+	//XXX
+	QObject::connect(&handler, &IRCMessageHandler::tempSend, worker, &IRCWorker::sendPrivmsg, Qt::QueuedConnection);
 
 	QObject::connect(&buffers, &IRCBufferModel::serverAdded, ui.serv_list, &QTreeView::expand, Qt::QueuedConnection);
 

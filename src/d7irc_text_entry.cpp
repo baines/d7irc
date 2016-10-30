@@ -9,12 +9,10 @@ IRCTextEntry::IRCTextEntry(QWidget*& w)
 
 void IRCTextEntry::keyPressEvent(QKeyEvent* ev)
 {
-	// TODO: parse commands in here
-
 	if(ev->key() == Qt::Key_Return){
 		if(!(ev->modifiers() & Qt::ShiftModifier)){
-//			emit textSubmit();
 			setMaximumHeight(minimumHeight());
+			handleSubmit();
 			clear();
 			line_count = 1;
 		} else {
@@ -26,4 +24,23 @@ void IRCTextEntry::keyPressEvent(QKeyEvent* ev)
 	} else {
 		QTextEdit::keyPressEvent(ev);
 	}
+}
+
+void IRCTextEntry::handleSubmit()
+{
+	//TODO: commands, encode formatting
+
+	QString str = toPlainText();
+
+	if(str.startsWith("/")){
+		if(!str.startsWith("//")){
+			// command
+			return;
+		} else {
+			str.remove(0, 1);
+		}
+	}
+
+	// text
+	emit textSubmit(str);
 }

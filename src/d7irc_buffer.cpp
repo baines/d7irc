@@ -45,14 +45,23 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 	fmt.setIndent(0.0);
 	fmt.setTextIndent(0.0);
 	fmt.setNonBreakableLines(true);
-
 	cursor.setBlockFormat(fmt);
+
+	QTextCharFormat wtf;
+	wtf.setForeground(IRCUserModel::nickColor(prefix));
+	cursor.setCharFormat(wtf);
+
 	cursor.insertText(prefix);
+
+	wtf.setForeground(QColor(0, 255, 0));
+	cursor.setCharFormat(wtf);
 	cursor.insertText(" | ");
 
 	cursor.movePosition(QTextCursor::NextCell);
 
 	fmt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	cursor.setCharFormat(QTextCharFormat());
 	cursor.setBlockFormat(fmt);
 	cursor.insertText(msg);
 }

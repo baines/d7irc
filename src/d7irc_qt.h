@@ -8,8 +8,10 @@
 #include <qabstractitemmodel.h>
 #include <qabstractitemview.h>
 #include <qitemdelegate.h>
+#include <qsocketnotifier.h>
 #include <qtreeview.h>
 #include <libircclient.h>
+#include <memory>
 
 struct IRCBuffer;
 
@@ -25,6 +27,7 @@ public:
 signals:
 	void textSubmit(const QString& text);
 private:
+	void handleSubmit(void);
 	int line_height;
 	int line_count;
 };
@@ -49,8 +52,8 @@ public slots:
 	void sendPrivmsg(const QString& target, const QString& msg);
 	void sendRaw(const QString& raw);
 private:
+	std::vector<std::unique_ptr<QSocketNotifier>> notifiers;
 	irc_session_t* irc_session;
-	QTimer* timer;
 };
 
 
@@ -88,8 +91,11 @@ public:
 	int rowCount  (const QModelIndex& parent = QModelIndex()) const override;
 	QVariant data (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 
-	void addNick (const QString& nick);
-	void delNick (const QString& nick);
+	void add (const QString& nick);
+	void del (const QString& nick);
+
+	static QColor nickColor(const QString& nick);
+
 private:
 	std::vector<QString> nicks;
 };
@@ -113,7 +119,11 @@ class IRCMessageHandler : public QObject {
 	Q_OBJECT;
 public:
 	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui);
+signals:
+	void tempSend(const QString& chan, const QString& msg);
 public slots:
+
+	// from server to us
 	void handleIRCConnect (const QString& serv);
 	void handleIRCJoin    (const QString& serv, const QString& chan, const QString& user);
 	void handleIRCPart    (const QString& serv, const QString& chan, const QString& user);
@@ -121,6 +131,10 @@ public slots:
 	void handleIRCNick    (const QString& serv, const QString& user, const QString& new_nick);
 	void handleIRCPrivMsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
 	void handleIRCNumeric (const QString& serv, uint32_t event, const QStringList& data);
+
+	// from us to server
+
+	void sendIRCMessage (const QString& text);
 private:
 	IRCBufferModel* buf_model;
 	Ui::SamuraIRC*  ui;
