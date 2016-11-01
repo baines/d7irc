@@ -9,6 +9,7 @@
 #include <qabstractitemview.h>
 #include <qitemdelegate.h>
 #include <qsocketnotifier.h>
+#include <qnetworkaccessmanager.h>
 #include <qtreeview.h>
 #include <libircclient.h>
 #include <memory>
@@ -115,10 +116,21 @@ private:
 };
 
 
+class IRCExternalDownloader : public QObject {
+	Q_OBJECT;
+public:
+	IRCExternalDownloader() = default;
+public slots:
+	void checkMessage(const QString& msg, IRCBuffer* buf);
+private:
+	QNetworkAccessManager net;
+};
+
+
 class IRCMessageHandler : public QObject {
 	Q_OBJECT;
 public:
-	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui);
+	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui, IRCExternalDownloader* dl);
 signals:
 	void tempSend(const QString& chan, const QString& msg);
 public slots:
@@ -136,9 +148,9 @@ public slots:
 
 	void sendIRCMessage (const QString& text);
 private:
+	IRCExternalDownloader* downloader;
 	IRCBufferModel* buf_model;
 	Ui::SamuraIRC*  ui;
 };
 
-// TODO: thread for curl_multi to get images / code snippets
 #endif

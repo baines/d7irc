@@ -82,8 +82,6 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 
 void IRCUserModel::add(const QString& nick) {
 
-	printf("i'mma add %s\n", nick.toUtf8().constData());
-
 	for(auto& n : nicks){
 		if(n == nick){
 			return;

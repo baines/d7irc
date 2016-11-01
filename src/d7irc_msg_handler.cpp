@@ -3,9 +3,10 @@
 #include <libircclient.h>
 #include <libirc_rfcnumeric.h>
 
-IRCMessageHandler::IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui)
+IRCMessageHandler::IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui, IRCExternalDownloader* dl)
 : buf_model(model)
-, ui(ui) {
+, ui(ui)
+, downloader(dl) {
 
 }
 
@@ -48,6 +49,7 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 	char nick[1024];
 	irc_target_get_nick(from.toUtf8().constData(), nick, sizeof(nick));
 
+	//FIXME: real nick
 	if(to == "d7"){
 		buf = buf_model->addChannel(serv, nick);
 	} else {
@@ -55,6 +57,7 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 	}
 
 	buf->addLine(nick, msg);
+	downloader->checkMessage(msg, buf);
 }
 
 static const char nick_start_symbols[] = "[]\\`_^{|}";
@@ -62,22 +65,17 @@ static const char nick_start_symbols[] = "[]\\`_^{|}";
 void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, const QStringList& data){
 	switch(event){
 		case LIBIRC_RFC_RPL_NAMREPLY: {
-			puts("derp");
 			if(data.size() < 4) break;
-			puts("herp");
 
 			QStringList names = data[3].split(' ', QString::SkipEmptyParts);
 			IRCBuffer* buf = buf_model->addChannel(serv, data[2]);
 
 			for(int i = 0; i < names.size(); ++i){
 				const char* str = names[i].toUtf8().constData();
-				printf("str %d = %s\n", i, str);
 
 				if(!isalpha(*str) && !strchr(nick_start_symbols, *str)){
-					printf("adding %s\n", str + 1);
 					buf->nicks.add(str + 1);
 				} else {
-					printf("adding22 %s\n", str);
 					buf->nicks.add(names[i]);
 				}
 			}

@@ -31,19 +31,24 @@ int main(int argc, char** argv){
 	QApplication app(argc, argv);
 	QMainWindow* win = new QMainWindow;
 
+	QPalette p;
+	p.setColor(QPalette::Link, Qt::white);
+	p.setColor(QPalette::LinkVisited, Qt::white);
+	win->setPalette(p);
+
 	Ui::SamuraIRC ui;
 	ui.setupUi(win);
-
-	IRCGUILogic ui_logic(&ui);
-
+	ui.chat_lines->setPalette(p);
+	
 	QThread* irc_thread = new QThread;
 	IRCWorker* worker = new IRCWorker(irc_thread);
-
 	QObject::connect(irc_thread, &QThread::started, worker, &IRCWorker::begin);
 
-	IRCBufferModel buffers(ui.chat_lines, ui.serv_list);
+	IRCGUILogic           ui_logic(&ui);
+	IRCBufferModel        buffers(ui.chat_lines, ui.serv_list);
+	IRCExternalDownloader downloader;
+	IRCMessageHandler     handler(&buffers, &ui, &downloader);
 
-	IRCMessageHandler handler(&buffers, &ui);
 	QObject::connect(worker, &IRCWorker::connect, &handler, &IRCMessageHandler::handleIRCConnect, Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::join   , &handler, &IRCMessageHandler::handleIRCJoin   , Qt::QueuedConnection);
 	QObject::connect(worker, &IRCWorker::part   , &handler, &IRCMessageHandler::handleIRCPart   , Qt::QueuedConnection);

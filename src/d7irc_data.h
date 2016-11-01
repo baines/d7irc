@@ -27,6 +27,7 @@ struct IRCBuffer {
 	IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent);
 
 	void addLine(const QString& prefix, const QString& msg);
+	void addImage(const QImage& img);
 
 	IRCBufferType type;
 	QString name;

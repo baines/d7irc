@@ -4,10 +4,10 @@ HDRS := $(wildcard src/*.h)
 OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
 
 CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC -g\
- $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets)
+ $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets Qt5Network)
 
 d7irc: $(OBJS)
-	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lircclient
+	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lQt5Network -lircclient
 
 build/%.o: src/%.cpp $(UI)
 	$(CXX) $(CFLAGS) -c $< -o $@

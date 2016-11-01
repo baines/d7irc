@@ -108,14 +108,17 @@ void IRCWorker::begin()
 	}
 
 //	const char* temp_connect = "irc.handmade.network";
-	const char* temp_connect = "127.0.0.1";
-	const char* temp_name = "d12ninja";
+//	int port = 7666;
 
+	const char* temp_connect = "127.0.0.1";
+	int port = 6667;
+
+	const char* temp_name = "d12ninja";
 	server = temp_connect;
 
 	irc_set_ctx(irc_session, this);
 
-	if(irc_connect(irc_session, temp_connect, 7666, NULL, temp_name, temp_name, temp_name) != 0){
+	if(irc_connect(irc_session, temp_connect, port, NULL, temp_name, temp_name, temp_name) != 0){
 		puts("fix me 2");
 		return;
 	}
