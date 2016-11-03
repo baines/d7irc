@@ -22,3 +22,5 @@ clean:
 	$(RM) build/*.h build/*.o d7irc
 
 .PHONY: clean
+
+.SECONDARY:

@@ -57,6 +57,10 @@ int IRCUserModel::rowCount(const QModelIndex& parent) const {
 	return nicks.size();
 }
 
+int IRCUserModel::columnCount(const QModelIndex& parent) const {
+	return 2;
+}
+
 QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 	if(idx.row() < 0 || idx.row() >= nicks.size()){
 		return QVariant();
@@ -64,16 +68,30 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 
 	const QString& nick = nicks[idx.row()];
 
-	switch(role){
-		case Qt::DisplayRole: {
-			return QVariant(nick);
+	if(idx.column() == 0){
+		switch(role){
+			case Qt::DisplayRole: {
+				return QVariant(QString("@"));
+			}
+			case Qt::ForegroundRole:
+				return QVariant(QColor(0, 200, 0));
+			case Qt::SizeHintRole:
+				return QVariant(QSize(20, 20));
+			default:
+				return QVariant();
 		}
-		case Qt::ForegroundRole:
-			return QVariant(nickColor(nick));
-		case Qt::SizeHintRole:
-			return QVariant(QSize(-1, 20));
-		default:
-			return QVariant();
+	} else {
+		switch(role){
+			case Qt::DisplayRole: {
+				return QVariant(nick);
+			}
+			case Qt::ForegroundRole:
+				return QVariant(nickColor(nick));
+			case Qt::SizeHintRole:
+				return QVariant(QSize(-1, 20));
+			default:
+				return QVariant();
+		}
 	}
 }
 
@@ -111,3 +129,7 @@ void IRCUserModel::del(const QString& nick) {
 	}
 }
 
+bool IRCUserModelSorter::lessThan(const QModelIndex& a, const QModelIndex& b) const {
+	// TODO;
+	return true;
+}

@@ -12,7 +12,6 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 , cursor(contents) {
 
 	contents->setDefaultFont(QFont("DejaVu Sans Mono", 9));
-
 }
 
 void IRCBuffer::addLine(const QString& prefix, const QString& msg){
@@ -86,14 +85,7 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 }
 
 void IRCBuffer::addImage(const QImage& img){
-
 	cursor.currentTable()->appendRows(1);
 	cursor.movePosition(QTextCursor::NextRow);
-
-	QTextImageFormat fmt;
-	fmt.setName("randomly_generate_me");
-
-	contents->addResource(QTextDocument::ImageResource, fmt.name(), img);
-	cursor.insertImage(fmt);
-
+	cursor.insertImage(img);
 }

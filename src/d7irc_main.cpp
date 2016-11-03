@@ -31,14 +31,8 @@ int main(int argc, char** argv){
 	QApplication app(argc, argv);
 	QMainWindow* win = new QMainWindow;
 
-	QPalette p;
-	p.setColor(QPalette::Link, Qt::white);
-	p.setColor(QPalette::LinkVisited, Qt::white);
-	win->setPalette(p);
-
 	Ui::SamuraIRC ui;
 	ui.setupUi(win);
-	ui.chat_lines->setPalette(p);
 	
 	QThread* irc_thread = new QThread;
 	IRCWorker* worker = new IRCWorker(irc_thread);

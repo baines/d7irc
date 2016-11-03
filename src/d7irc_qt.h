@@ -7,6 +7,7 @@
 #include <qtimer.h>
 #include <qabstractitemmodel.h>
 #include <qabstractitemview.h>
+#include <qsortfilterproxymodel.h>
 #include <qitemdelegate.h>
 #include <qsocketnotifier.h>
 #include <qnetworkaccessmanager.h>
@@ -83,14 +84,20 @@ private:
 	IRCBuffer* root;
 };
 
+struct IRCBufferModelSorter : public QSortFilterProxyModel {
+	Q_OBJECT;
+	bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
+};
 
-class IRCUserModel : public QAbstractListModel {
+
+class IRCUserModel : public QAbstractTableModel {
 	Q_OBJECT;
 public:
 	IRCUserModel();
 
-	int rowCount  (const QModelIndex& parent = QModelIndex()) const override;
-	QVariant data (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
+	int rowCount    (const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount (const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data   (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 
 	void add (const QString& nick);
 	void del (const QString& nick);
@@ -99,6 +106,11 @@ public:
 
 private:
 	std::vector<QString> nicks;
+};
+
+struct IRCUserModelSorter : public QSortFilterProxyModel {
+	Q_OBJECT;
+	bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
 };
 
 

@@ -28,6 +28,7 @@ struct IRCBuffer {
 
 	void addLine(const QString& prefix, const QString& msg);
 	void addImage(const QImage& img);
+	const QString& getOurNick();
 
 	IRCBufferType type;
 	QString name;
@@ -39,6 +40,9 @@ struct IRCBuffer {
 	IRCBuffer* sibling;
 
 	QTextCursor cursor;
+
+	// only when type == server
+	QString our_nick;
 };
 
 #endif

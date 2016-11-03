@@ -1,1 +1,5 @@
 /d7irc
+/build
+
+# gets generated from .h
+/src/d7irc_qt.cpp

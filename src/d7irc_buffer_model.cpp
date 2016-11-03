@@ -195,3 +195,8 @@ IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 
 	return buf;
 }
+
+bool IRCBufferModelSorter::lessThan(const QModelIndex& a, const QModelIndex& b) const {
+	// TODO;
+	return true;
+}
