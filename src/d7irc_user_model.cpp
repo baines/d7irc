@@ -1,4 +1,6 @@
 #include "d7irc_qt.h"
+#include "d7irc_data.h"
+#include <cassert>
 
 #define countof(x) (sizeof((x))/sizeof(*(x)))
 
@@ -49,7 +51,8 @@ QColor IRCUserModel::nickColor(const QString& str){
 	return palette[sum % countof(palette)];
 }
 
-IRCUserModel::IRCUserModel() {
+IRCUserModel::IRCUserModel(IRCBuffer* server)
+: server(server) {
 
 }
 
@@ -66,13 +69,18 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 		return QVariant();
 	}
 
-	const QString& nick = nicks[idx.row()];
+	const User& nick = nicks[idx.row()];
 
 	if(idx.column() == 0){
 		switch(role){
 			case Qt::DisplayRole: {
-				return QVariant(QString("@"));
-			}
+				if(nick.prefix_idx == DEFAULT_PREFIX_IDX) return QVariant();
+				
+				assert(server->type == IRC_BUF_SERVER);
+				IRCServerBuffer* buf = reinterpret_cast<IRCServerBuffer*>(server);
+
+				return QVariant(QString(buf->prefixes[nick.prefix_idx].prefix));
+			} break;
 			case Qt::ForegroundRole:
 				return QVariant(QColor(0, 200, 0));
 			case Qt::SizeHintRole:
@@ -82,11 +90,10 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 		}
 	} else {
 		switch(role){
-			case Qt::DisplayRole: {
-				return QVariant(nick);
-			}
+			case Qt::DisplayRole:
+				return QVariant(nick.nick);
 			case Qt::ForegroundRole:
-				return QVariant(nickColor(nick));
+				return QVariant(nickColor(nick.nick));
 			case Qt::SizeHintRole:
 				return QVariant(QSize(-1, 20));
 			default:
@@ -95,41 +102,48 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 	}
 }
 
-// TODO: we need mode information / operator etc
-//       and maybe more for context menu actions.
+// TODO: multiple prefix support
 
-void IRCUserModel::add(const QString& nick) {
+void IRCUserModel::add(const QString& nick, int prefix_idx) {
 
-	for(auto& n : nicks){
-		if(n == nick){
-			return;
+	User new_usr = { nick, prefix_idx };
+
+	auto it = std::lower_bound(
+		nicks.begin(),
+		nicks.end(),
+		new_usr,
+		[](const User& a, const User& b){
+			if(a.prefix_idx != b.prefix_idx){
+				return a.prefix_idx < b.prefix_idx;
+			} else {
+				return QString::localeAwareCompare(a.nick, b.nick) < 0;
+			}
 		}
+	);
+
+	if(it != nicks.end() && it->nick == nick){
+		it->prefix_idx = prefix_idx;
+		return;
 	}
 
 	char real_nick[1024];
 	irc_target_get_nick(nick.toUtf8().constData(), real_nick, sizeof(real_nick));
 
-	beginInsertRows(QModelIndex(), nicks.size(), 0);
-	nicks.push_back(real_nick);
+	beginInsertRows(QModelIndex(), it - nicks.begin(), it - nicks.begin());
+	nicks.insert(it, User { real_nick, prefix_idx });
 	endInsertRows();
 }
 
 void IRCUserModel::del(const QString& nick) {
-
 	char real_nick[1024];
 	irc_target_get_nick(nick.toUtf8().constData(), real_nick, sizeof(real_nick));
 
 	for(int i = 0; i < nicks.size(); ++i){
-		if(nicks[i].compare(nick) == 0){
-			beginRemoveRows(QModelIndex(), i, 0);
+		if(nicks[i].nick.compare(nick) == 0){
+			beginRemoveRows(QModelIndex(), i, i);
 			nicks.erase(nicks.begin() + i);
 			endRemoveRows();
 			return;
 		}
 	}
-}
-
-bool IRCUserModelSorter::lessThan(const QModelIndex& a, const QModelIndex& b) const {
-	// TODO;
-	return true;
 }

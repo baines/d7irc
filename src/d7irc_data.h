@@ -22,27 +22,35 @@ enum IRCBufferType : int {
 	IRC_BUF_CHANNEL,
 };
 
+struct IRCPrefix {
+	char prefix;
+	char mode;
+};
+
 struct IRCBuffer {
 
 	IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent);
 
 	void addLine(const QString& prefix, const QString& msg);
 	void addImage(const QImage& img);
-	const QString& getOurNick();
 
 	IRCBufferType type;
+	
 	QString name;
 	QTextDocument* contents;
+	QTextCursor cursor;
 	IRCUserModel nicks;
 
 	IRCBuffer* parent;
 	IRCBuffer* child;
 	IRCBuffer* sibling;
+};
 
-	QTextCursor cursor;
+struct IRCServerBuffer : public IRCBuffer {
+	IRCServerBuffer(const QString& name, IRCBuffer* parent);
 
-	// only when type == server
 	QString our_nick;
+	std::vector<IRCPrefix> prefixes;
 };
 
 #endif

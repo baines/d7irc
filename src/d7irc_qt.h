@@ -15,7 +15,10 @@
 #include <libircclient.h>
 #include <memory>
 
+#define DEFAULT_PREFIX_IDX 0xFFFF
+
 struct IRCBuffer;
+struct IRCServerBuffer;
 
 namespace Ui {
 	class SamuraIRC;
@@ -71,12 +74,9 @@ public:
 	QVariant data       (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 	Qt::ItemFlags flags (const QModelIndex& idx) const override;
 
-	IRCBuffer* addServer  (const QString& name);
-	IRCBuffer* addChannel (const QString& serv, const QString& chan);
-
-	IRCBuffer* findServer  (const QString& name);
-	IRCBuffer* findChannel (const QString& serv, const QString& chan);
-	IRCBuffer* getDefault  ();
+	IRCServerBuffer* addServer  (const QString& name);
+	IRCBuffer*       addChannel (const QString& serv, const QString& chan);
+	IRCBuffer*       getDefault  ();
 
 signals:
 	void serverAdded (const QModelIndex& idx);
@@ -84,33 +84,27 @@ private:
 	IRCBuffer* root;
 };
 
-struct IRCBufferModelSorter : public QSortFilterProxyModel {
-	Q_OBJECT;
-	bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
-};
-
-
 class IRCUserModel : public QAbstractTableModel {
 	Q_OBJECT;
 public:
-	IRCUserModel();
+	IRCUserModel(IRCBuffer* container);
 
 	int rowCount    (const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount (const QModelIndex& parent = QModelIndex()) const override;
 	QVariant data   (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 
-	void add (const QString& nick);
+	void add (const QString& nick, int prefix_idx = DEFAULT_PREFIX_IDX);
 	void del (const QString& nick);
 
 	static QColor nickColor(const QString& nick);
 
-private:
-	std::vector<QString> nicks;
-};
+	struct User {
+		QString nick;
+		int prefix_idx;
+	};
 
-struct IRCUserModelSorter : public QSortFilterProxyModel {
-	Q_OBJECT;
-	bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
+	std::vector<User> nicks;
+	IRCBuffer* server;
 };
 
 

@@ -1,11 +1,12 @@
 #include "d7irc_data.h"
 #include <qtexttable.h>
+#include <qdebug.h>
 
 IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 : type(type)
 , name(name)
 , contents(new QTextDocument)
-, nicks()
+, nicks(parent)
 , parent(parent)
 , child(nullptr)
 , sibling(nullptr)
@@ -72,20 +73,41 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 	cursor.movePosition(QTextCursor::NextCell);
 
 	block_fmt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
 	cursor.setCharFormat(QTextCharFormat());
 	cursor.setBlockFormat(block_fmt);
 
-	QString msg2 = msg.toHtmlEscaped();
-	msg2.replace(
-		QRegExp("\\b((https?://|ftp://|mailto:|gopher://)[^ ]+)"),
-		"<a href=\"\\1\"><span style='color: #308CC6'>\\1</span></a>"
-	);
-	cursor.insertHtml(msg2);
+	static QRegExp link_regex("\\b((https?://|ftp://|mailto:|gopher://)[^ ]+)");
+
+	int prev_pos = 0, pos = 0;
+
+	while((pos = link_regex.indexIn(msg, prev_pos)) != -1){
+		QStringRef plain_text (&msg, prev_pos, pos - prev_pos);
+		QStringRef link_text  (&msg, pos, link_regex.matchedLength());
+
+		cursor.insertText(plain_text.toString());
+
+		QString link = QString("<a href=\"%1\"><span style='color: #308CC6'>%1</span></a>").arg(link_text.toString().toHtmlEscaped());
+		cursor.insertHtml(link);
+		
+		cursor.setCharFormat(QTextCharFormat());
+		cursor.setBlockFormat(block_fmt);
+
+		prev_pos = pos + link_regex.matchedLength();
+	}
+
+	QStringRef plain_text(&msg, prev_pos, msg.size() - prev_pos);
+	cursor.insertText(plain_text.toString());
 }
 
 void IRCBuffer::addImage(const QImage& img){
 	cursor.currentTable()->appendRows(1);
 	cursor.movePosition(QTextCursor::NextRow);
 	cursor.insertImage(img);
+}
+
+IRCServerBuffer::IRCServerBuffer(const QString& name, IRCBuffer* parent)
+: IRCBuffer(IRC_BUF_SERVER, name, parent)
+, our_nick()
+, prefixes({ { '@', 'o' }, { '%', 'h' }, { '+', 'v' }}) {
+
 }

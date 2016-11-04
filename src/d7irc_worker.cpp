@@ -107,11 +107,13 @@ void IRCWorker::begin()
 		return;
 	}
 
-//	const char* temp_connect = "irc.handmade.network";
-//	int port = 7666;
-
+#if 0
+	const char* temp_connect = "irc.handmade.network";
+	int port = 7666;
+#else
 	const char* temp_connect = "127.0.0.1";
 	int port = 6667;
+#endif
 
 	const char* temp_name = "d12ninja";
 	server = temp_connect;

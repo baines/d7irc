@@ -1,0 +1,38 @@
+[X] - fix missing double spaces in msg, html unecape or something
+[ ] - icons for nick prefixes
+[ ] 	- support multi-prefix?
+[ ] - sort nicks by prefix + alpha
+[ ] - right click nick menu
+[ ] 	- whois, etc
+[ ] 	- if operator, kick, ban, etc
+[ ] - settings dialogue
+[ ] 	- modal window
+[ ] 	- auto download images
+[ ] 		- expand/collapse with [+] [-] anchors
+[ ] 		- download all not just imgur
+[ ] 	- auto download code
+[ ]			- qt syntax highlighter/formatter thing
+[ ] 		- gist / refheap / pastebin / hastebin?
+[ ] - commands
+[ ] 	- /join
+[ ] 	- /connect
+[ ] 	- /nick
+[ ] 	- /me
+[ ] - nick label
+[ ] 	- click to change / enter settings?
+[ ] - formatting buttons
+[ ] 	- toggle when not highlighted
+[ ] 	- otherwise format highlighted section
+[ ] - fix auto expanding box with backspace etc
+[ ] - correctly handle multiple servers
+[ ] 	- show disconnected buffers with ( )
+[ ] - logging
+[ ] - irc color formatting
+[ ]		- convert control codes to html
+[ ] - server / internal buffers
+[ ] - file transfers
+[ ] - split privmsg from chanmsg
+[ ] - server / channel classes derived from buffer?
+[ ] - figure out why there's an invisible thing in the buffer list
+[ ] - be more consistent with terms server/buffer user/nick etc
+[ ] - QString is really shit, use alt_str stuff instead

@@ -88,7 +88,7 @@ int IRCBufferModel::columnCount(const QModelIndex& parent) const {
 QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 
 	if(!idx.isValid()){
-		return QVariant();
+		return role == Qt::DisplayRole ? QVariant(QString("wtf")) : QVariant();
 	}
 
 	const IRCBuffer* p = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
@@ -121,15 +121,17 @@ Qt::ItemFlags IRCBufferModel::flags(const QModelIndex& idx) const {
 	return QAbstractItemModel::flags(idx);
 }
 
-IRCBuffer* IRCBufferModel::addServer(const QString& name){
+IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
 
 	IRCBuffer* p = root->child;
 	while(p){
-		if(p->name == name) return p;
+		if(p->type == IRC_BUF_SERVER && p->name == name){
+			return reinterpret_cast<IRCServerBuffer*>(p);
+		}
 		p = p->sibling;
 	}
 
-	IRCBuffer* buf = new IRCBuffer(IRC_BUF_SERVER, name, root);
+	IRCServerBuffer* buf = new IRCServerBuffer(name, root);
 
 	int row = 1;
 
@@ -196,7 +198,6 @@ IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 	return buf;
 }
 
-bool IRCBufferModelSorter::lessThan(const QModelIndex& a, const QModelIndex& b) const {
-	// TODO;
-	return true;
+IRCBuffer* IRCBufferModel::getDefault(){
+	return root->child;
 }

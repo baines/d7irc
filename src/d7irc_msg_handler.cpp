@@ -50,7 +50,7 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 	irc_target_get_nick(from.toUtf8().constData(), nick, sizeof(nick));
 
 	//FIXME: real nick
-	if(to == "d7"){
+	if(to == "d12ninja"){
 		buf = buf_model->addChannel(serv, nick);
 	} else {
 		buf = buf_model->addChannel(serv, to);
@@ -62,7 +62,20 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 
 static const char nick_start_symbols[] = "[]\\`_^{|}";
 
+int get_prefix_idx(IRCServerBuffer* serv, char prefix){
+
+	for(int i = 0; i < serv->prefixes.size(); ++i){
+		if(serv->prefixes[i].prefix == prefix){
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, const QStringList& data){
+	IRCServerBuffer* sbuf = buf_model->addServer(serv);
+
 	switch(event){
 		case LIBIRC_RFC_RPL_NAMREPLY: {
 			if(data.size() < 4) break;
@@ -71,15 +84,37 @@ void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, co
 			IRCBuffer* buf = buf_model->addChannel(serv, data[2]);
 
 			for(int i = 0; i < names.size(); ++i){
-				const char* str = names[i].toUtf8().constData();
+				char c = names[i].toLatin1().constData()[0];
 
-				if(!isalpha(*str) && !strchr(nick_start_symbols, *str)){
-					buf->nicks.add(str + 1);
+				if(!isalpha(c) && !strchr(nick_start_symbols, c)){
+					buf->nicks.add(names[i].mid(1), get_prefix_idx(sbuf, c));
 				} else {
 					buf->nicks.add(names[i]);
 				}
 			}
+		} break;
 
+		// RPL_ISUPPORT
+		case 5: {
+			static QRegExp pre_reg("^PREFIX=\\(([^\\)]+)\\)(.*)$");
+			for(auto& s : data){
+				if(pre_reg.exactMatch(s)){
+					puts("got prefix match");
+					QString modes = pre_reg.cap(1);
+					QString prefixes = pre_reg.cap(2);
+					if(modes.size() != prefixes.size()) return;
+
+					sbuf->prefixes.clear();
+					for(int i = 0; i < modes.size(); ++i){
+						sbuf->prefixes.push_back(IRCPrefix { prefixes[i].toLatin1(), modes[i].toLatin1() });
+					}
+				}
+			}
+		} break;
+
+		default: {
+			IRCBuffer* buf = buf_model->getDefault();
+			buf->addLine(QString::number(event), data.join(" :: "));
 		} break;
 	}
 }
@@ -100,6 +135,7 @@ void IRCMessageHandler::sendIRCMessage(const QString& str){
 		} break;
 
 		case IRC_BUF_CHANNEL: {
+			puts("sending");
 			emit tempSend(buf->name, str);
 			buf->addLine("d12ninja", str);
 		} break;

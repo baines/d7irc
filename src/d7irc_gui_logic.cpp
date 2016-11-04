@@ -8,8 +8,8 @@ IRCGUILogic::IRCGUILogic(Ui::SamuraIRC* ui)
 }
 
 void IRCGUILogic::bufferChange(const QModelIndex& idx, const QModelIndex&){
+	
 	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
-
 	ui->chat_lines->setDocument(buf->contents);
 
 	QScrollBar* s = ui->chat_lines->verticalScrollBar();
