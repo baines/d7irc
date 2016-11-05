@@ -1,5 +1,6 @@
 /d7irc
 /build
 
-# gets generated from .h
+# generated files
 /src/d7irc_qt.cpp
+/src/d7irc_qrc.cpp

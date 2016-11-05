@@ -40,24 +40,6 @@
        </color>
       </brush>
      </colorrole>
-     <colorrole role="Link">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
-       </color>
-      </brush>
-     </colorrole>
-     <colorrole role="LinkVisited">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
-       </color>
-      </brush>
-     </colorrole>
     </active>
     <inactive>
      <colorrole role="Button">
@@ -87,24 +69,6 @@
        </color>
       </brush>
      </colorrole>
-     <colorrole role="Link">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
-       </color>
-      </brush>
-     </colorrole>
-     <colorrole role="LinkVisited">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
-       </color>
-      </brush>
-     </colorrole>
     </inactive>
     <disabled>
      <colorrole role="Button">
@@ -131,24 +95,6 @@
         <red>0</red>
         <green>0</green>
         <blue>0</blue>
-       </color>
-      </brush>
-     </colorrole>
-     <colorrole role="Link">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
-       </color>
-      </brush>
-     </colorrole>
-     <colorrole role="LinkVisited">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>48</red>
-        <green>140</green>
-        <blue>198</blue>
        </color>
       </brush>
      </colorrole>
@@ -234,33 +180,6 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Light">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Dark">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Mid">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>184</red>
-               <green>181</green>
-               <blue>178</blue>
-              </color>
-             </brush>
-            </colorrole>
             <colorrole role="Text">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
@@ -312,42 +231,6 @@
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Link">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="LinkVisited">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="AlternateBase">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="NoRole">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
               </color>
              </brush>
             </colorrole>
@@ -371,33 +254,6 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Light">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Dark">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Mid">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>184</red>
-               <green>181</green>
-               <blue>178</blue>
-              </color>
-             </brush>
-            </colorrole>
             <colorrole role="Text">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
@@ -452,50 +308,14 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Link">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="LinkVisited">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="AlternateBase">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="NoRole">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
            </inactive>
            <disabled>
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
@@ -508,7 +328,7 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Light">
+            <colorrole role="Text">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
                <red>255</red>
@@ -517,39 +337,12 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Dark">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Mid">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>184</red>
-               <green>181</green>
-               <blue>178</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
             <colorrole role="ButtonText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
@@ -589,47 +382,17 @@
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Link">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="LinkVisited">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>48</red>
-               <green>140</green>
-               <blue>198</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="AlternateBase">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
-            <colorrole role="NoRole">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>23</red>
-               <green>23</green>
-               <blue>26</blue>
-              </color>
-             </brush>
-            </colorrole>
            </disabled>
           </palette>
          </property>
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::DefaultContextMenu</enum>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
          </property>
          <property name="styleSheet">
           <string notr="true">color: #fff;
@@ -653,35 +416,15 @@ selection-color: #fff;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans Mono'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; cellspacing=&quot;2&quot; cellpadding=&quot;0&quot;&gt;
-&lt;tr&gt;
-&lt;td&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hello | &lt;/p&gt;&lt;/td&gt;
-&lt;td&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;World&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is some longer text | &lt;/p&gt;&lt;/td&gt;
-&lt;td&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Very long Very long Very long Very long Very long Very long Very long Very long Very long Very long Very long Very long &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;d7 | &lt;/p&gt;&lt;/td&gt;
-&lt;td&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;blah blah&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;d7 | &lt;/p&gt;&lt;/td&gt;
-&lt;td&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/test/fruits.png&quot; width=&quot;200&quot; /&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hello | &lt;/p&gt;&lt;/td&gt;
-&lt;td&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://example.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;World&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#00aaff;&quot;&gt; .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#0055ff;&quot;&gt;;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'``&lt;/span&gt;``'  &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#aa55ff;&quot;&gt;'[==/[[[[,,[[ '[[, [[[[, ,[[[[,[['     [[[[[[,/[[[' ,[[ '[[, [[[[[[,/[[[' [[[   &lt;/span&gt;      &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#aa557f;&quot;&gt;  '''    c$$$cc$$$c$$$$$$$$&amp;quot;$$$$$      $$$$$$$$$c  c$$$cc$$$c$$$$$$$$$c   $$$   &lt;/span&gt;&lt;span style=&quot; color:#aa55ff;&quot;&gt; &lt;/span&gt;     &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#ff5500;&quot;&gt; 88b    dP888   888888 Y88&amp;quot; 88888    .d888888b &amp;quot;88bo888   888888888b &amp;quot;88bo`88bo,__,o, &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;  &amp;quot;YMmMY&amp;quot; YMM   &amp;quot;&amp;quot;`MMM  M'  &amp;quot;MMM&amp;quot;YmmMMMM&amp;quot;&amp;quot;MMMM   &amp;quot;W&amp;quot;YMM   &amp;quot;&amp;quot;`MMMMMMM   &amp;quot;W&amp;quot;  &amp;quot;YUMMMMMP&amp;quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
          </property>
          <property name="openExternalLinks">
           <bool>true</bool>
@@ -719,6 +462,9 @@ p, li { white-space: pre-wrap; }
              <bold>true</bold>
             </font>
            </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="styleSheet">
             <string notr="true">color: #fff;
 background-color: #17171A;
@@ -754,6 +500,9 @@ font: bold 9pt &quot;DejaVu Sans Mono&quot;;</string>
              <width>32</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
            </property>
            <property name="styleSheet">
             <string notr="true">color: #fff;
@@ -792,6 +541,9 @@ text-decoration: underline;</string>
              <bold>false</bold>
             </font>
            </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="styleSheet">
             <string notr="true">color: #fff;
 background-color: #17171A;
@@ -818,6 +570,9 @@ font: italic 9pt  &quot;DejaVu Sans Mono&quot;;</string>
              <width>32</width>
              <height>24</height>
             </size>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
            </property>
            <property name="styleSheet">
             <string notr="true">color: #fff;
@@ -931,6 +686,9 @@ selection-color: #fff;</string>
            <width>0</width>
            <height>40</height>
           </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
          </property>
          <property name="styleSheet">
           <string notr="true">color: #fff;
@@ -1086,7 +844,7 @@ font: 9pt &quot;DejaVu Sans Mono&quot;;</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="test.qrc"/>
+  <include location="../ui/d7irc.qrc"/>
  </resources>
  <connections/>
 </ui>

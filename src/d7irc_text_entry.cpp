@@ -9,20 +9,28 @@ IRCTextEntry::IRCTextEntry(QWidget*& w)
 
 void IRCTextEntry::keyPressEvent(QKeyEvent* ev)
 {
-	if(ev->key() == Qt::Key_Return){
-		if(!(ev->modifiers() & Qt::ShiftModifier)){
-			setMaximumHeight(minimumHeight());
-			handleSubmit();
-			clear();
-			line_count = 1;
-		} else {
-			if(++line_count < 16){
-				setMaximumHeight(maximumHeight() + line_height);
+	switch(ev->key()){
+		case Qt::Key_Return: {
+			if(!(ev->modifiers() & Qt::ShiftModifier)){
+				setMaximumHeight(minimumHeight());
+				handleSubmit();
+				clear();
+				line_count = 1;
+			} else {
+				if(++line_count < 16){
+					setMaximumHeight(maximumHeight() + line_height);
+				}
+				QTextEdit::keyPressEvent(ev);
 			}
+		} break;
+
+		case Qt::Key_Tab: {
+			// nick completion
+		} break;
+
+		default: {
 			QTextEdit::keyPressEvent(ev);
 		}
-	} else {
-		QTextEdit::keyPressEvent(ev);
 	}
 }
 

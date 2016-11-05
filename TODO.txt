@@ -1,7 +1,7 @@
-[X] - fix missing double spaces in msg, html unecape or something
-[ ] - icons for nick prefixes
+[x] - fix missing double spaces in msg, html unecape or something
+[x] - icons for nick prefixes
 [ ] 	- support multi-prefix?
-[ ] - sort nicks by prefix + alpha
+[x] - sort nicks by prefix + alpha
 [ ] - right click nick menu
 [ ] 	- whois, etc
 [ ] 	- if operator, kick, ban, etc
@@ -33,6 +33,7 @@
 [ ] - file transfers
 [ ] - split privmsg from chanmsg
 [ ] - server / channel classes derived from buffer?
-[ ] - figure out why there's an invisible thing in the buffer list
 [ ] - be more consistent with terms server/buffer user/nick etc
 [ ] - QString is really shit, use alt_str stuff instead
+[ ] - tab autocomplete nicks
+[ ] - fix expanding text input with resize / backspace

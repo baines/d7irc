@@ -2,12 +2,38 @@
 #include <qtreeview.h>
 #include <cassert>
 
+struct {
+	QColor color;
+	const char* line;
+} logo[] = {
+	{ { 0x00, 0x7f, 0xff }, R"xx( .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  )xx" },
+	{ { 0x55, 0x7f, 0xff }, R"xx(;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'````'  )xx" },
+	{ { 0xaa, 0x55, 0xff }, R"xx('[==/[[[[,,[[ '[[, [[[[, ,[[[[,[['     [[[[[[,/[[[' ,[[ '[[, [[[[[[,/[[[' [[[         )xx" },
+	{ { 0xaa, 0x55, 0x7f }, R"xx(  '''    c$$$cc$$$c$$$$$$$$"$$$$$      $$$$$$$$$c  c$$$cc$$$c$$$$$$$$$c   $$$         )xx" },
+	{ { 0xff, 0x55, 0x00 }, R"xx( 88b    dP888   888888 Y88" 88888    .d888888b "88bo888   888888888b "88bo`88bo,__,o, )xx" },
+	{ { 0xff, 0x00, 0x00 }, R"xx(  "YMmMY" YMM   ""`MMM  M'  "MMM"YmmMMMM""MMMM   "W"YMM   ""`MMMMMMM   "W"  "YUMMMMMP")xx" },
+};
+
 IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
 : root(new IRCBuffer(IRC_BUF_INTERNAL, "root", nullptr)){
 	
 	beginInsertRows(QModelIndex(), 0, 0);
 	root->child = new IRCBuffer(IRC_BUF_INTERNAL, "SamuraIRC", root);
 	endInsertRows();
+
+	QTextCursor c(root->child->contents);
+	QTextCharFormat f;
+
+	c.beginEditBlock();
+	for(auto& line : logo){
+		f.setForeground(line.color);
+		c.setCharFormat(f);
+		c.insertText(line.line);
+		c.insertText("\n");
+	}
+	c.setCharFormat(QTextCharFormat());
+	c.insertText(" v0.0.0 by Alex Baines");
+	c.endEditBlock();
 
 	edit->setDocument(root->child->contents);
 

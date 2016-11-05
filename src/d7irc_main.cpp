@@ -33,6 +33,10 @@ int main(int argc, char** argv){
 
 	Ui::SamuraIRC ui;
 	ui.setupUi(win);
+	ui.chat_lines->setCursorWidth(0);
+	ui.text_input->setFocus();
+
+	app.setWindowIcon(QIcon(":/main/icon.png"));
 	
 	QThread* irc_thread = new QThread;
 	IRCWorker* worker = new IRCWorker(irc_thread);
@@ -64,7 +68,15 @@ int main(int argc, char** argv){
 		&ui_logic, &IRCGUILogic::bufferChange
 	);
 
+
+	QObject::connect(
+		ui.chat_lines, &QWidget::customContextMenuRequested, [](const QPoint& p){
+			puts("WOOP WOOP");
+		}
+	);
+
 	irc_thread->start();
+
 	win->show();
 	return app.exec();
 }

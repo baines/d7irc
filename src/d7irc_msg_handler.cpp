@@ -116,9 +116,8 @@ void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, QS
 		} break;
 
 		default: {
-			IRCBuffer* buf = buf_model->getDefault();
 			data.removeFirst();
-			buf->addLine(QString::number(event), data.join(" :: "));
+			sbuf->addLine(QString::number(event), data.join(" :: "));
 		} break;
 	}
 }
