@@ -1,5 +1,6 @@
 #include "d7irc_data.h"
 #include <qtreeview.h>
+#include <cassert>
 
 IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
 : root(new IRCBuffer(IRC_BUF_INTERNAL, "root", nullptr)){
@@ -88,7 +89,7 @@ int IRCBufferModel::columnCount(const QModelIndex& parent) const {
 QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 
 	if(!idx.isValid()){
-		return role == Qt::DisplayRole ? QVariant(QString("wtf")) : QVariant();
+		return QVariant();
 	}
 
 	const IRCBuffer* p = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
@@ -123,31 +124,24 @@ Qt::ItemFlags IRCBufferModel::flags(const QModelIndex& idx) const {
 
 IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
 
-	IRCBuffer* p = root->child;
-	while(p){
-		if(p->type == IRC_BUF_SERVER && p->name == name){
-			return reinterpret_cast<IRCServerBuffer*>(p);
-		}
-		p = p->sibling;
+	int row = 1;
+	IRCBuffer** p = &root->child->sibling;
+	while(*p && QString::localeAwareCompare(name, (*p)->name) > 0){
+		p = &(*p)->sibling;
+		++row;
+	}
+
+	if(*p && (*p)->name == name){
+		assert((*p)->type == IRC_BUF_SERVER);
+		return reinterpret_cast<IRCServerBuffer*>(*p);
 	}
 
 	IRCServerBuffer* buf = new IRCServerBuffer(name, root);
 
-	int row = 1;
-
-	if(!root->child){
-		root->child = buf;
-		row = 0;
-	} else {
-		p = root->child;
-		while(p->sibling){
-			p = p->sibling;
-			++row;
-		}
-		p->sibling = buf;
-	}
-
 	beginInsertRows(QModelIndex(), row, row);
+	IRCBuffer* tmp = *p;
+	*p = buf;
+	buf->sibling = tmp;
 	endInsertRows();
 
 	emit serverAdded(createIndex(row, 0, buf));
@@ -158,41 +152,32 @@ IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
 IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 	
 	IRCBuffer* s = addServer(serv);
-	IRCBuffer* p = s->child;
+	IRCBuffer** p = &s->child;
 
-	while(p){
-		if(p->name == chan) return p;
-		p = p->sibling;
+	int row = 0;
+	while(*p && QString::localeAwareCompare(chan, (*p)->name) > 0){
+		p = &(*p)->sibling;
+		++row;
+	}
+
+	if(*p && (*p)->name == chan){
+		assert((*p)->type == IRC_BUF_CHANNEL);
+		return *p;
 	}
 
 	IRCBuffer* buf = new IRCBuffer(IRC_BUF_CHANNEL, chan, s);
 
-	int row = 1;
-
-	if(!s->child){
-		s->child = buf;
-		row = 0;
-	} else {
-		p = s->child;
-		while(p->sibling){
-			++row;
-			p = p->sibling;
-		}
-		p->sibling = buf;
-	}
-
 	QModelIndex parent_idx;
 	{
-		int pr = 0;
-		IRCBuffer* tmp = root->child;
-		while(tmp != s){
-			++pr;
-			tmp = tmp->sibling;
-		}
-		parent_idx = createIndex(pr, 0, s);
+		int i = 0;
+		for(IRCBuffer* pp = root->child; pp != s; pp = pp->sibling) ++i;
+		parent_idx = createIndex(i, 0, s);
 	}
 
 	beginInsertRows(parent_idx, row, row);
+	IRCBuffer* tmp = *p;
+	*p = buf;
+	buf->sibling = tmp;
 	endInsertRows();
 
 	return buf;

@@ -50,7 +50,7 @@ signals:
 	void quit    (const QString& serv, const QString& user, const QString& msg);
 	void privmsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
 	void nick    (const QString& serv, const QString& user, const QString& new_nick);
-	void numeric (const QString& serv, unsigned event, const QStringList& data);
+	void numeric (const QString& serv, unsigned event, QStringList data);
 public slots:
 	void begin();
 	void tick();
@@ -148,7 +148,7 @@ public slots:
 	void handleIRCQuit    (const QString& serv, const QString& user, const QString& msg);
 	void handleIRCNick    (const QString& serv, const QString& user, const QString& new_nick);
 	void handleIRCPrivMsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
-	void handleIRCNumeric (const QString& serv, uint32_t event, const QStringList& data);
+	void handleIRCNumeric (const QString& serv, uint32_t event, QStringList data);
 
 	// from us to server
 

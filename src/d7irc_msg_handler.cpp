@@ -73,7 +73,7 @@ int get_prefix_idx(IRCServerBuffer* serv, char prefix){
 	return -1;
 }
 
-void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, const QStringList& data){
+void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, QStringList data){
 	IRCServerBuffer* sbuf = buf_model->addServer(serv);
 
 	switch(event){
@@ -94,8 +94,11 @@ void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, co
 			}
 		} break;
 
-		// RPL_ISUPPORT
-		case 5: {
+		case LIBIRC_RFC_RPL_ENDOFNAMES: {
+			// ignore
+		} break;
+
+		case 5: /* RPL_ISUPPORT */ {
 			static QRegExp pre_reg("^PREFIX=\\(([^\\)]+)\\)(.*)$");
 			for(auto& s : data){
 				if(pre_reg.exactMatch(s)){
@@ -114,6 +117,7 @@ void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, co
 
 		default: {
 			IRCBuffer* buf = buf_model->getDefault();
+			data.removeFirst();
 			buf->addLine(QString::number(event), data.join(" :: "));
 		} break;
 	}

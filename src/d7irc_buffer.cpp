@@ -11,7 +11,8 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 , child(nullptr)
 , sibling(nullptr)
 , cursor(contents) {
-
+	contents->setMaximumBlockCount(8192);
+	contents->setUndoRedoEnabled(false);
 	contents->setDefaultFont(QFont("DejaVu Sans Mono", 9));
 }
 
@@ -36,6 +37,8 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 		cursor.movePosition(QTextCursor::PreviousCell);
 		cursor.movePosition(QTextCursor::PreviousCell);
 	}
+
+	cursor.beginEditBlock();
 
 	QTextCharFormat  char_fmt;
 	QTextBlockFormat block_fmt;
@@ -97,6 +100,9 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 
 	QStringRef plain_text(&msg, prev_pos, msg.size() - prev_pos);
 	cursor.insertText(plain_text.toString());
+
+	cursor.endEditBlock();
+
 }
 
 void IRCBuffer::addImage(const QImage& img){
