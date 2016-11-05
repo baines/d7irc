@@ -7,17 +7,18 @@
 [ ] 	- if operator, kick, ban, etc
 [ ] - settings dialogue
 [ ] 	- modal window
-[ ] 	- auto download images
-[ ] 		- expand/collapse with [+] [-] anchors
-[ ] 		- download all not just imgur
-[ ] 	- auto download code
-[ ]			- qt syntax highlighter/formatter thing
-[ ] 		- gist / refheap / pastebin / hastebin?
+[ ]		- QSettings
+[-] - auto download images
+[ ] 	- expand/collapse with [+] [-] anchors
+[ ] 	- download all not just imgur
+[ ] - auto download code
+[ ]		- qt syntax highlighter/formatter thing
+[ ] 	- gist / refheap / pastebin / hastebin?
 [ ] - commands
-[ ] 	- /join
+[-] 	- /join
 [ ] 	- /connect
-[ ] 	- /nick
-[ ] 	- /me
+[-] 	- /nick
+[-] 	- /me
 [ ] - nick label
 [ ] 	- click to change / enter settings?
 [ ] - formatting buttons
@@ -32,8 +33,9 @@
 [ ] - server / internal buffers
 [ ] - file transfers
 [ ] - split privmsg from chanmsg
-[ ] - server / channel classes derived from buffer?
+[-] - server / channel classes derived from buffer?
 [ ] - be more consistent with terms server/buffer user/nick etc
 [ ] - QString is really shit, use alt_str stuff instead
 [ ] - tab autocomplete nicks
 [ ] - fix expanding text input with resize / backspace
+[ ] - topic bar, appears when (h)op, or when topic is set?

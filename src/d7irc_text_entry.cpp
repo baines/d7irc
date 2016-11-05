@@ -42,7 +42,7 @@ void IRCTextEntry::handleSubmit()
 
 	if(str.startsWith("/")){
 		if(!str.startsWith("//")){
-			// command
+			emit command(str.mid(1));
 			return;
 		} else {
 			str.remove(0, 1);

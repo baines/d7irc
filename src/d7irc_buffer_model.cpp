@@ -165,9 +165,8 @@ IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
 	IRCServerBuffer* buf = new IRCServerBuffer(name, root);
 
 	beginInsertRows(QModelIndex(), row, row);
-	IRCBuffer* tmp = *p;
+	buf->sibling = *p;
 	*p = buf;
-	buf->sibling = tmp;
 	endInsertRows();
 
 	emit serverAdded(createIndex(row, 0, buf));
@@ -201,9 +200,8 @@ IRCBuffer* IRCBufferModel::addChannel(const QString& serv, const QString& chan){
 	}
 
 	beginInsertRows(parent_idx, row, row);
-	IRCBuffer* tmp = *p;
+	buf->sibling = *p;
 	*p = buf;
-	buf->sibling = tmp;
 	endInsertRows();
 
 	return buf;

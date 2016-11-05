@@ -34,8 +34,8 @@ irc_quit(irc_session_t* s, const char*, const char* origin, const char** argv, u
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 	QString quit_msg;
-	if(n > 0 && argv[0]){
-		quit_msg = argv[0];
+	for(int i = 0; i < n; ++i){
+		quit_msg += argv[i];
 	}
 	emit w->quit(w->server, origin, quit_msg);
 }
@@ -56,6 +56,23 @@ irc_nick(irc_session_t* s, const char*, const char* origin, const char** argv, u
 {
 	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
 	emit w->nick(w->server, origin, argv[0]);
+}
+
+static void
+irc_action(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n)
+{
+	IRCWorker* w = static_cast<IRCWorker*>(irc_get_ctx(s));
+
+	char nick[1024] = "";
+	irc_target_get_nick(origin, nick, sizeof(nick)-1);
+	strcat(nick, " ");
+
+	QString msg(nick);
+	if(n > 1 && argv[1]){
+		msg += argv[1];
+	}
+
+	emit w->privmsg(w->server, "*", argv[0], msg);
 }
 
 /*
@@ -96,8 +113,9 @@ void IRCWorker::begin()
 	cb.event_privmsg     = irc_privmsg;
 	cb.event_join        = irc_join;
 	cb.event_part        = irc_part;
+	cb.event_quit        = irc_quit;
 	cb.event_nick        = irc_nick;
-//	cb.event_ctcp_action = irc_cb;
+	cb.event_ctcp_action = irc_action;
 //	cb.event_unknown     = irc_cb;
 	cb.event_numeric     = irc_numeric;
 

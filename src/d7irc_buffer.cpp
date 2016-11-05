@@ -102,7 +102,6 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 	cursor.insertText(plain_text.toString());
 
 	cursor.endEditBlock();
-
 }
 
 void IRCBuffer::addImage(const QImage& img){

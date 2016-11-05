@@ -31,6 +31,7 @@ public:
 	void keyPressEvent(QKeyEvent* ev) override;
 signals:
 	void textSubmit(const QString& text);
+	void command(const QString& cmd);
 private:
 	void handleSubmit(void);
 	int line_height;
@@ -94,7 +95,7 @@ public:
 	QVariant data   (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 
 	void add (const QString& nick, int prefix_idx = DEFAULT_PREFIX_IDX);
-	void del (const QString& nick);
+	bool del (const QString& nick);
 
 	static QColor nickColor(const QString& nick);
 
@@ -139,6 +140,7 @@ public:
 	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui, IRCExternalDownloader* dl);
 signals:
 	void tempSend(const QString& chan, const QString& msg);
+	void tempSendRaw(const QString& raw);
 public slots:
 
 	// from server to us
@@ -153,6 +155,8 @@ public slots:
 	// from us to server
 
 	void sendIRCMessage (const QString& text);
+	void sendIRCCommand (const QString& cmd);
+
 private:
 	IRCExternalDownloader* downloader;
 	IRCBufferModel* buf_model;

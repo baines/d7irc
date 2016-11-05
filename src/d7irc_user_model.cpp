@@ -134,16 +134,18 @@ void IRCUserModel::add(const QString& nick, int prefix_idx) {
 	endInsertRows();
 }
 
-void IRCUserModel::del(const QString& nick) {
+bool IRCUserModel::del(const QString& nick) {
 	char real_nick[1024];
 	irc_target_get_nick(nick.toUtf8().constData(), real_nick, sizeof(real_nick));
 
 	for(int i = 0; i < nicks.size(); ++i){
-		if(nicks[i].nick.compare(nick) == 0){
+		if(nicks[i].nick.compare(real_nick) == 0){
 			beginRemoveRows(QModelIndex(), i, i);
 			nicks.erase(nicks.begin() + i);
 			endRemoveRows();
-			return;
+			return true;
 		}
 	}
+
+	return false;
 }
