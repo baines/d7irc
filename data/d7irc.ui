@@ -597,6 +597,33 @@ font: 14pt &quot;Symbola&quot;;</string>
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QCheckBox" name="chk_joinpart">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: #aaa;
+background-color: #000;
+font: 8pt &quot;DejaVu Sans Mono&quot;;
+selection-background-color: rgb(85, 85, 127);
+selection-color: #fff;
+</string>
+           </property>
+           <property name="text">
+            <string>Joins/Parts</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -815,7 +842,7 @@ selection-color: #fff;</string>
 font: 9pt &quot;DejaVu Sans Mono&quot;;</string>
            </property>
            <property name="text">
-            <string>[ d7 ]</string>
+            <string>[  ]</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

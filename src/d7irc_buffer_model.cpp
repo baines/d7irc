@@ -6,8 +6,8 @@ struct {
 	QColor color;
 	const char* line;
 } logo[] = {
-	{ { 0x00, 0x7f, 0xff }, R"xx( .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  )xx" },
-	{ { 0x55, 0x7f, 0xff }, R"xx(;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'````'  )xx" },
+	{ { 0x55, 0x7f, 0xff }, R"xx( .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  )xx" },
+	{ { 0x7f, 0x7f, 0xff }, R"xx(;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'````'  )xx" },
 	{ { 0xaa, 0x55, 0xff }, R"xx('[==/[[[[,,[[ '[[, [[[[, ,[[[[,[['     [[[[[[,/[[[' ,[[ '[[, [[[[[[,/[[[' [[[         )xx" },
 	{ { 0xaa, 0x55, 0x7f }, R"xx(  '''    c$$$cc$$$c$$$$$$$$"$$$$$      $$$$$$$$$c  c$$$cc$$$c$$$$$$$$$c   $$$         )xx" },
 	{ { 0xff, 0x55, 0x00 }, R"xx( 88b    dP888   888888 Y88" 88888    .d888888b "88bo888   888888888b "88bo`88bo,__,o, )xx" },
@@ -112,6 +112,12 @@ int IRCBufferModel::columnCount(const QModelIndex& parent) const {
 	return 1;
 }
 
+static QVariant chan_colors[] = {
+	QVariant(),
+	QVariant(QColor(0xF5, 0xFF, 0x3C)),
+	QVariant(QColor(0xF2, 0x3C, 0xFF)),
+};
+
 QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 
 	if(!idx.isValid()){
@@ -121,8 +127,15 @@ QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 	const IRCBuffer* p = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
 
 	switch(role){
-		case Qt::DisplayRole:
-			return QVariant(p->name);
+
+		case Qt::DisplayRole: {
+			if(p->inactive){
+				return QVariant(QString("(%1)").arg(p->name));
+			} else {
+				return QVariant(p->name);
+			}
+		} break;
+
 		case Qt::SizeHintRole:
 			return QVariant(QSize(-1, 20));
 		case Qt::ForegroundRole: {
@@ -132,7 +145,7 @@ QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 			} else if(p->type == IRC_BUF_SERVER){
 				return QVariant(QBrush(QColor(100, 255, 100)));
 			} else {
-				return QVariant();
+				return chan_colors[p->level];
 			}
 		}
 		default:

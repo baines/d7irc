@@ -30,7 +30,7 @@ void IRCMessageHandler::handleIRCPart(const QString& serv, const QString& chan, 
 
 void IRCMessageHandler::handleIRCQuit(const QString& serv, const QString& user, const QString& msg){
 	IRCBuffer* buf = buf_model->addServer(serv);
-	QString text = user + " quit.";
+	QString text = user + " quit";
 	if(!msg.isEmpty()){
 		text += " (" + msg + ")";
 	}
@@ -147,6 +147,17 @@ void IRCMessageHandler::handleIRCNumeric(const QString& serv, uint32_t event, QS
 	}
 }
 
+// TODO: take server id param
+void IRCMessageHandler::handleIRCDisconnect(int err, int sub_err){
+	if(err == IRC_ERR_SELECT){
+		fprintf(stderr, "Disconnected: %d: %s\n", err, strerror(sub_err));
+	} else {
+		fprintf(stderr, "Disconnected: %d: %s\n", err, irc_strerror(sub_err));
+	}
+
+	//TODO: mark relevent buffers inactive
+}
+
 void IRCMessageHandler::sendIRCMessage(const QString& str){
 	QModelIndex idx = ui->serv_list->currentIndex();
 	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
@@ -211,3 +222,4 @@ void IRCMessageHandler::sendIRCCommand(const QString& cmd){
 		emit tempSendRaw(cmd);
 	}
 }
+

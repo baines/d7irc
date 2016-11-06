@@ -6,11 +6,13 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 : type(type)
 , name(name)
 , contents(new QTextDocument)
+, cursor(contents)
 , nicks(parent)
+, inactive(false)
+, level(IRC_BUFLVL_NORMAL)
 , parent(parent)
 , child(nullptr)
-, sibling(nullptr)
-, cursor(contents) {
+, sibling(nullptr) {
 	contents->setMaximumBlockCount(8192);
 	contents->setUndoRedoEnabled(false);
 	contents->setDefaultFont(QFont("DejaVu Sans Mono", 9));

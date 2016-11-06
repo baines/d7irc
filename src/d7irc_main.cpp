@@ -1,5 +1,6 @@
 #include <qobject.h>
 #include <qapplication.h>
+#include <qshortcut.h>
 #include "d7irc_qt.h"
 #include "d7irc_ui.h"
 
@@ -31,52 +32,52 @@ int main(int argc, char** argv){
 	QApplication app(argc, argv);
 	QMainWindow* win = new QMainWindow;
 
+	app.setWindowIcon(QIcon(":/main/icon.png"));
+
 	Ui::SamuraIRC ui;
 	ui.setupUi(win);
 	ui.chat_lines->setCursorWidth(0);
 	ui.text_input->setFocus();
-
-	app.setWindowIcon(QIcon(":/main/icon.png"));
-	
-	QThread* irc_thread = new QThread;
-	IRCWorker* worker = new IRCWorker(irc_thread);
-	QObject::connect(irc_thread, &QThread::started, worker, &IRCWorker::begin);
 
 	IRCGUILogic           ui_logic(&ui);
 	IRCBufferModel        buffers(ui.chat_lines, ui.serv_list);
 	IRCExternalDownloader downloader;
 	IRCMessageHandler     handler(&buffers, &ui, &downloader);
 
-	QObject::connect(worker, &IRCWorker::connect, &handler, &IRCMessageHandler::handleIRCConnect, Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::join   , &handler, &IRCMessageHandler::handleIRCJoin   , Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::part   , &handler, &IRCMessageHandler::handleIRCPart   , Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::quit   , &handler, &IRCMessageHandler::handleIRCQuit   , Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::nick   , &handler, &IRCMessageHandler::handleIRCNick   , Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::privmsg, &handler, &IRCMessageHandler::handleIRCPrivMsg, Qt::QueuedConnection);
-	QObject::connect(worker, &IRCWorker::numeric, &handler, &IRCMessageHandler::handleIRCNumeric, Qt::QueuedConnection);
-
 	QObject::connect(ui.text_input, &IRCTextEntry::textSubmit, &handler, &IRCMessageHandler::sendIRCMessage);
 	QObject::connect(ui.text_input, &IRCTextEntry::command   , &handler, &IRCMessageHandler::sendIRCCommand);
-
-	//XXX temp: need server param
-	QObject::connect(&handler, &IRCMessageHandler::tempSend   , worker, &IRCWorker::sendPrivmsg, Qt::QueuedConnection);
-	QObject::connect(&handler, &IRCMessageHandler::tempSendRaw, worker, &IRCWorker::sendRaw    , Qt::QueuedConnection);
-
-	QObject::connect(&buffers, &IRCBufferModel::serverAdded, ui.serv_list, &QTreeView::expand, Qt::QueuedConnection);
-
-	// TODO: connect worker join to serv_list select
+	
+	QObject::connect(&buffers, &IRCBufferModel::serverAdded, ui.serv_list, &QTreeView::expand);
 
 	QObject::connect(
 		ui.serv_list->selectionModel(), &QItemSelectionModel::currentChanged,
 		&ui_logic, &IRCGUILogic::bufferChange
 	);
 
+	QShortcut next_buf(QKeySequence(Qt::Key_Down | Qt::AltModifier), win);
+	QShortcut prev_buf(QKeySequence(Qt::Key_Up   | Qt::AltModifier), win);
 
-	QObject::connect(
-		ui.chat_lines, &QWidget::customContextMenuRequested, [](const QPoint& p){
-			puts("WOOP WOOP");
-		}
-	);
+	auto* list = ui.serv_list;
+	QObject::connect(&next_buf, &QShortcut::activated, [=](){
+		QKeyEvent* e1 = new QKeyEvent(QEvent::KeyPress  , Qt::Key_Down, Qt::NoModifier);
+		QKeyEvent* e2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Down, Qt::NoModifier);
+		qApp->postEvent(list, e1);
+		qApp->postEvent(list, e2);
+	});
+	QObject::connect(&prev_buf, &QShortcut::activated, [=](){
+		QKeyEvent* e1 = new QKeyEvent(QEvent::KeyPress  , Qt::Key_Up, Qt::NoModifier);
+		QKeyEvent* e2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Up, Qt::NoModifier);
+		qApp->postEvent(list, e1);
+		qApp->postEvent(list, e2);
+	});
+
+	// TODO: create connections in ui_logic on demand
+	QThread*       irc_thread = new QThread;
+	IRCConnection* connection = new IRCConnection(irc_thread, &handler);
+
+	//XXX temp: need server param
+	QObject::connect(&handler, &IRCMessageHandler::tempSend   , connection, &IRCConnection::sendPrivmsg, Qt::QueuedConnection);
+	QObject::connect(&handler, &IRCMessageHandler::tempSendRaw, connection, &IRCConnection::sendRaw    , Qt::QueuedConnection);
 
 	irc_thread->start();
 

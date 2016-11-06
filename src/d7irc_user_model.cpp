@@ -45,7 +45,7 @@ QColor IRCUserModel::nickColor(const QString& str){
 	size_t sum = 0;
 	std::u32string ustr = str.toStdU32String();
 	for(char32_t c : ustr){
-		sum += c;
+		sum += (int)c;
 	}
 
 	return palette[sum % countof(palette)];
