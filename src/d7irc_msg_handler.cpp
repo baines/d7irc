@@ -70,21 +70,11 @@ void IRCMessageHandler::handleIRCPrivMsg(const QString& serv, const QString& fro
 		buf = buf_model->addChannel(serv, to);
 	}
 
-	bool do_scroll = false;
-	QScrollBar* sbar = ui->chat_lines->verticalScrollBar();
-	if(sbar->value() == sbar->maximum()){
-		do_scroll = true;
-	}
-
 	buf->addLine(nick, msg);
-
-	if(do_scroll){
-		sbar->setValue(sbar->maximum());
-	}
-
 	downloader->checkMessage(msg, buf);
 }
 
+// TODO: use prefixes in server buf instead?
 static const char nick_start_symbols[] = "[]\\`_^{|}";
 
 int get_prefix_idx(IRCServerBuffer* serv, char prefix){
@@ -177,22 +167,12 @@ void IRCMessageHandler::sendIRCMessage(const QString& str){
 			puts("sending");
 			emit tempSend(buf->name, str);
 
-			bool do_scroll = false;
-			QScrollBar* sbar = ui->chat_lines->verticalScrollBar();
-			if(sbar->value() == sbar->maximum()){
-				do_scroll = true;
-			}
-
 			if(str.startsWith("\001ACTION ")){
 				//TODO: real nick
 				buf->addLine("*", QString("d12ninja ") + str.mid(8, str.size() - 9));
 			} else {
 				//TODO: real nick
 				buf->addLine("d12ninja", str);
-			}
-
-			if(do_scroll){
-				sbar->setValue(sbar->maximum());
 			}
 		} break;
 	}

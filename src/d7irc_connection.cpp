@@ -9,10 +9,14 @@ irc_connect(irc_session_t* s, const char*, const char* origin, const char** argv
 	emit w->connect(w->server);
 
 	// XXX remove later, get channels from IRCSettings
+#if 1
 	irc_cmd_join(s, "#random", NULL);
 	irc_cmd_join(s, "#dev", NULL);
 	irc_cmd_join(s, "#hmn", NULL);
 	irc_cmd_join(s, "#hero", NULL);
+#else 
+	irc_cmd_join(s, "##linux", NULL);
+#endif
 }
 
 static void

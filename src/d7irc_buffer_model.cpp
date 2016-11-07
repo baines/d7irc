@@ -137,7 +137,7 @@ QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 		} break;
 
 		case Qt::SizeHintRole:
-			return QVariant(QSize(-1, 20));
+			return QVariant(QSize(-1, 18));
 		case Qt::ForegroundRole: {
 			// TODO: color palette
 			if(p->type == IRC_BUF_INTERNAL){

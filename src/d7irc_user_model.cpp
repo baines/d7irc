@@ -84,7 +84,7 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 			case Qt::ForegroundRole:
 				return QVariant(QColor(0, 200, 0));
 			case Qt::SizeHintRole:
-				return QVariant(QSize(20, 20));
+				return QVariant(QSize(18, 18));
 			default:
 				return QVariant();
 		}
@@ -95,7 +95,7 @@ QVariant IRCUserModel::data(const QModelIndex& idx, int role) const {
 			case Qt::ForegroundRole:
 				return QVariant(nickColor(nick.nick));
 			case Qt::SizeHintRole:
-				return QVariant(QSize(-1, 20));
+				return QVariant(QSize(-1, 18));
 			default:
 				return QVariant();
 		}

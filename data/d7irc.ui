@@ -105,12 +105,21 @@
    <string>SamuraIRC</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(0, 0, 0);</string>
+   <string notr="true">background-color: #000;</string>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Triangular</enum>
   </property>
   <widget class="QWidget" name="container_main">
+   <property name="styleSheet">
+    <string notr="true">* {
+	font: 9pt &quot;Terminus&quot;;
+	color: #fff;
+	background-color: #000;
+	selection-background-color: rgb(85, 85, 127);
+	selection-color: #fff;
+}</string>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
      <number>2</number>
@@ -395,12 +404,7 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: #fff;
-background-color: #17171A;
-font: 9pt &quot;DejaVu Sans Mono&quot;;
-selection-background-color: rgb(85, 85, 127);
-selection-color: #fff;
-</string>
+          <string notr="true">background-color: #17171A;</string>
          </property>
          <property name="tabChangesFocus">
           <bool>true</bool>
@@ -415,13 +419,13 @@ selection-color: #fff;
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans Mono'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#00aaff;&quot;&gt; .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#0055ff;&quot;&gt;;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'``&lt;/span&gt;``'  &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#aa55ff;&quot;&gt;'[==/[[[[,,[[ '[[, [[[[, ,[[[[,[['     [[[[[[,/[[[' ,[[ '[[, [[[[[[,/[[[' [[[   &lt;/span&gt;      &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#aa557f;&quot;&gt;  '''    c$$$cc$$$c$$$$$$$$&amp;quot;$$$$$      $$$$$$$$$c  c$$$cc$$$c$$$$$$$$$c   $$$   &lt;/span&gt;&lt;span style=&quot; color:#aa55ff;&quot;&gt; &lt;/span&gt;     &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#ff5500;&quot;&gt; 88b    dP888   888888 Y88&amp;quot; 88888    .d888888b &amp;quot;88bo888   888888888b &amp;quot;88bo`88bo,__,o, &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;  &amp;quot;YMmMY&amp;quot; YMM   &amp;quot;&amp;quot;`MMM  M'  &amp;quot;MMM&amp;quot;YmmMMMM&amp;quot;&amp;quot;MMMM   &amp;quot;W&amp;quot;YMM   &amp;quot;&amp;quot;`MMMMMMM   &amp;quot;W&amp;quot;  &amp;quot;YUMMMMMP&amp;quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Terminus'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#00aaff;&quot;&gt; .::::::.  :::.    .        :   ...    :::::::::..   :::.    :::::::::..    .,-:::::  &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#0055ff;&quot;&gt;;;;`    `  ;;`;;   ;;,.    ;;;  ;;     ;;;;;;``;;;;  ;;`;;   ;;;;;;``;;;; ,;;;'``&lt;/span&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono';&quot;&gt;``'  &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#aa55ff;&quot;&gt;'[==/[[[[,,[[ '[[, [[[[, ,[[[[,[['     [[[[[[,/[[[' ,[[ '[[, [[[[[[,/[[[' [[[   &lt;/span&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono';&quot;&gt;      &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#aa557f;&quot;&gt;  '''    c$$$cc$$$c$$$$$$$$&amp;quot;$$$$$      $$$$$$$$$c  c$$$cc$$$c$$$$$$$$$c   $$$   &lt;/span&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#aa55ff;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono';&quot;&gt;     &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#ff5500;&quot;&gt; 88b    dP888   888888 Y88&amp;quot; 88888    .d888888b &amp;quot;88bo888   888888888b &amp;quot;88bo`88bo,__,o, &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'DejaVu Sans Mono'; color:#ff0000;&quot;&gt;  &amp;quot;YMmMY&amp;quot; YMM   &amp;quot;&amp;quot;`MMM  M'  &amp;quot;MMM&amp;quot;YmmMMMM&amp;quot;&amp;quot;MMMM   &amp;quot;W&amp;quot;YMM   &amp;quot;&amp;quot;`MMMMMMM   &amp;quot;W&amp;quot;  &amp;quot;YUMMMMMP&amp;quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -455,7 +459,7 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="font">
             <font>
-             <family>DejaVu Sans Mono</family>
+             <family>Terminus</family>
              <pointsize>9</pointsize>
              <weight>75</weight>
              <italic>false</italic>
@@ -468,7 +472,7 @@ p, li { white-space: pre-wrap; }
            <property name="styleSheet">
             <string notr="true">color: #fff;
 background-color: #17171A;
-font: bold 9pt &quot;DejaVu Sans Mono&quot;;</string>
+font: bold;</string>
            </property>
            <property name="text">
             <string>B</string>
@@ -507,7 +511,6 @@ font: bold 9pt &quot;DejaVu Sans Mono&quot;;</string>
            <property name="styleSheet">
             <string notr="true">color: #fff;
 background-color: #17171A;
-font: 9pt &quot;DejaVu Sans Mono&quot;;
 text-decoration: underline;</string>
            </property>
            <property name="text">
@@ -534,7 +537,7 @@ text-decoration: underline;</string>
            </property>
            <property name="font">
             <font>
-             <family>DejaVu Sans Mono</family>
+             <family>Terminus</family>
              <pointsize>9</pointsize>
              <weight>50</weight>
              <italic>true</italic>
@@ -547,7 +550,7 @@ text-decoration: underline;</string>
            <property name="styleSheet">
             <string notr="true">color: #fff;
 background-color: #17171A;
-font: italic 9pt  &quot;DejaVu Sans Mono&quot;;</string>
+font: italic</string>
            </property>
            <property name="text">
             <string>I</string>
@@ -610,10 +613,6 @@ font: 14pt &quot;Symbola&quot;;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">color: #aaa;
-background-color: #000;
-font: 8pt &quot;DejaVu Sans Mono&quot;;
-selection-background-color: rgb(85, 85, 127);
-selection-color: #fff;
 </string>
            </property>
            <property name="text">
@@ -637,24 +636,20 @@ selection-color: #fff;
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>28</height>
+           <height>24</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>28</height>
+           <height>24</height>
           </size>
          </property>
          <property name="focusPolicy">
           <enum>Qt::StrongFocus</enum>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: #fff;
-background-color: #17171A;
-font: 9pt &quot;DejaVu Sans Mono&quot;;
-selection-background-color: rgb(85, 85, 127);
-selection-color: #fff;</string>
+          <string notr="true">background-color: #17171A;</string>
          </property>
          <property name="tabStopWidth">
           <number>40</number>
@@ -718,11 +713,7 @@ selection-color: #fff;</string>
           <enum>Qt::NoFocus</enum>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: #fff;
-background-color: #17171A;
-font: 9pt &quot;DejaVu Sans Mono&quot;;
-selection-background-color: rgb(85, 85, 127);
-selection-color: #fff;</string>
+          <string notr="true">background-color: #17171A;</string>
          </property>
          <property name="indentation">
           <number>10</number>
@@ -762,11 +753,7 @@ selection-color: #fff;</string>
           <enum>Qt::NoFocus</enum>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: #fff;
-background-color: #17171A;
-font: 9pt &quot;DejaVu Sans Mono&quot;;
-selection-background-color: rgb(85, 85, 127);
-selection-color: #fff;</string>
+          <string notr="true">background-color: #17171A;</string>
          </property>
          <property name="showDropIndicator" stdset="0">
           <bool>false</bool>
@@ -828,18 +815,17 @@ selection-color: #fff;</string>
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>54</height>
+             <height>50</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>54</height>
+             <height>50</height>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">color: #fff;
-font: 9pt &quot;DejaVu Sans Mono&quot;;</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string>[  ]</string>
@@ -871,7 +857,7 @@ font: 9pt &quot;DejaVu Sans Mono&quot;;</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../ui/d7irc.qrc"/>
+  <include location="d7irc.qrc"/>
  </resources>
  <connections/>
 </ui>

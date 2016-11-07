@@ -4,7 +4,7 @@ IRCTextEntry::IRCTextEntry(QWidget*& w)
 : QTextEdit(w)
 , line_count(1)
 {
-	line_height = QFontMetrics(document()->defaultFont()).lineSpacing() + 1;
+	line_height = QFontMetrics(QFont("Terminus", 9)).lineSpacing();
 }
 
 void IRCTextEntry::keyPressEvent(QKeyEvent* ev)

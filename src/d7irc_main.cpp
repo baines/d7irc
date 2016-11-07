@@ -1,7 +1,7 @@
 #include <qobject.h>
 #include <qapplication.h>
-#include <qshortcut.h>
 #include "d7irc_qt.h"
+#include "d7irc_data.h"
 #include "d7irc_ui.h"
 
 #include <QDebug> 
@@ -39,37 +39,21 @@ int main(int argc, char** argv){
 	ui.chat_lines->setCursorWidth(0);
 	ui.text_input->setFocus();
 
-	IRCGUILogic           ui_logic(&ui);
+	IRCSettings           settings;
 	IRCBufferModel        buffers(ui.chat_lines, ui.serv_list);
 	IRCExternalDownloader downloader;
 	IRCMessageHandler     handler(&buffers, &ui, &downloader);
+	IRCGUILogic           ui_logic(&ui, win);
+
+	if(settings.first_run){
+		puts("first run, show add server dialogue when it exists...");
+	}
 
 	QObject::connect(ui.text_input, &IRCTextEntry::textSubmit, &handler, &IRCMessageHandler::sendIRCMessage);
 	QObject::connect(ui.text_input, &IRCTextEntry::command   , &handler, &IRCMessageHandler::sendIRCCommand);
 	
 	QObject::connect(&buffers, &IRCBufferModel::serverAdded, ui.serv_list, &QTreeView::expand);
 
-	QObject::connect(
-		ui.serv_list->selectionModel(), &QItemSelectionModel::currentChanged,
-		&ui_logic, &IRCGUILogic::bufferChange
-	);
-
-	QShortcut next_buf(QKeySequence(Qt::Key_Down | Qt::AltModifier), win);
-	QShortcut prev_buf(QKeySequence(Qt::Key_Up   | Qt::AltModifier), win);
-
-	auto* list = ui.serv_list;
-	QObject::connect(&next_buf, &QShortcut::activated, [=](){
-		QKeyEvent* e1 = new QKeyEvent(QEvent::KeyPress  , Qt::Key_Down, Qt::NoModifier);
-		QKeyEvent* e2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Down, Qt::NoModifier);
-		qApp->postEvent(list, e1);
-		qApp->postEvent(list, e2);
-	});
-	QObject::connect(&prev_buf, &QShortcut::activated, [=](){
-		QKeyEvent* e1 = new QKeyEvent(QEvent::KeyPress  , Qt::Key_Up, Qt::NoModifier);
-		QKeyEvent* e2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Up, Qt::NoModifier);
-		qApp->postEvent(list, e1);
-		qApp->postEvent(list, e2);
-	});
 
 	// TODO: create connections in ui_logic on demand
 	QThread*       irc_thread = new QThread;

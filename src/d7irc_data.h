@@ -14,17 +14,6 @@ enum IRCError : int {
 	IRC_ERR_SELECT,
 };
 
-enum IRCUserFlags : unsigned {
-	IRC_USR_OP    = (1 << 0),
-	IRC_USR_HOP   = (1 << 1),
-	IRC_USR_VOICE = (1 << 2),
-};
-
-struct IRCUser {
-	std::string name;
-	IRCUserFlags flags;
-};
-
 enum IRCBufferType : int {
 	IRC_BUF_INTERNAL,
 	IRC_BUF_SERVER,
@@ -35,6 +24,13 @@ enum IRCBufferLevel : int {
 	IRC_BUFLVL_NORMAL,
 	IRC_BUFLVL_ACTIVITY,
 	IRC_BUFLVL_HIGHLIGHT,
+};
+
+enum IRCOption : int {
+	IRC_OPT_HIDE_JOINPART,
+	IRC_OPT_IMG_EXPAND,
+	IRC_OPT_IMG_EXPAND_ALL,
+	IRC_OPT_CODE_EXPAND,
 };
 
 struct IRCPrefix {
@@ -72,12 +68,34 @@ struct IRCServerBuffer : public IRCBuffer {
 	// modes?
 };
 
+struct IRCServerDetails {
+	QString unique_name;
+
+	QString hostname;
+	QString nickname;
+	QString username;
+	QString password;
+	uint16_t port;
+	bool ssl;
+
+	// will be of form chan:passwd for passworded channels
+	QStringList channels;
+};
+
 struct IRCSettings {
-	QSettings qsettings;
-	// list of configured servers
-	//    hostname, port, wanted nick, username, pass, etc
-	//    qtkeychain for pass?
-	//    ID for each server
+	IRCSettings();
+
+	int               serverNameToID (const QString& name);
+	IRCServerDetails* getDetails     (int id);
+
+	int  getOption (IRCOption opt);
+	void setOption (IRCOption opt, int val);
+
+	bool first_run;
+
+private:
+	std::vector<IRCServerDetails> servers;
+	QSettings settings;
 };
 
 #endif

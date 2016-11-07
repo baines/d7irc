@@ -21,6 +21,7 @@ struct IRCBuffer;
 struct IRCServerBuffer;
 
 class IRCMessageHandler;
+class QMainWindow;
 
 namespace Ui {
 	class SamuraIRC;
@@ -116,7 +117,7 @@ public:
 class IRCGUILogic : public QObject {
 	Q_OBJECT;
 public:
-	IRCGUILogic(Ui::SamuraIRC* ui);
+	IRCGUILogic(Ui::SamuraIRC* ui, QMainWindow* win);
 public slots:
 	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
 //	bold/italic/etc buttons
@@ -124,6 +125,7 @@ public slots:
 //  click name to get settings / change name?
 private:
 	Ui::SamuraIRC* ui;
+	bool max_scroll;
 };
 
 

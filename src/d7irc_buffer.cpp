@@ -15,7 +15,11 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 , sibling(nullptr) {
 	contents->setMaximumBlockCount(8192);
 	contents->setUndoRedoEnabled(false);
-	contents->setDefaultFont(QFont("DejaVu Sans Mono", 9));
+
+	QFont f("Terminus", 9);
+	f.setHintingPreference(QFont::PreferVerticalHinting);
+	f.setStyleStrategy((QFont::StyleStrategy)(QFont::NoAntialias | QFont::PreferQuality | QFont::ForceIntegerMetrics));
+	contents->setDefaultFont(f);
 }
 
 void IRCBuffer::addLine(const QString& prefix, const QString& msg){
@@ -91,7 +95,7 @@ void IRCBuffer::addLine(const QString& prefix, const QString& msg){
 
 		cursor.insertText(plain_text.toString());
 
-		QString link = QString("<a href=\"%1\"><span style='color: #308CC6'>%1</span></a>").arg(link_text.toString().toHtmlEscaped());
+		QString link = QString("<a href=\"%1\"><span style='color: #159FFB'>%1</span></a>").arg(link_text.toString().toHtmlEscaped());
 		cursor.insertHtml(link);
 		
 		cursor.setCharFormat(QTextCharFormat());

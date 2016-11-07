@@ -44,3 +44,7 @@
 [ ] - colour highlight buffers with activity / pings
 [ ] - option to hide join/parts with keybind
 [ ] - nick prefixes on chat lines
+[ ] - fix url regex
+[ ] - qt5 has broken font-aa on linux, only does greyscale, find good workaround
+		- maybe use pixel font, terminus w/ no aa looks great but has no italics...
+		- also might need to bundle the font as a resource somehow?
