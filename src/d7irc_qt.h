@@ -5,12 +5,15 @@
 #include <qobject.h>
 #include <qthread.h>
 #include <qtimer.h>
+#include <qdialog.h>
+#include <qmainwindow.h>
 #include <qabstractitemmodel.h>
 #include <qabstractitemview.h>
 #include <qsortfilterproxymodel.h>
 #include <qitemdelegate.h>
 #include <qsocketnotifier.h>
 #include <qnetworkaccessmanager.h>
+#include <qmenu.h>
 #include <qtreeview.h>
 #include <libircclient.h>
 #include <memory>
@@ -25,6 +28,7 @@ class QMainWindow;
 
 namespace Ui {
 	class SamuraIRC;
+	class AddServer;
 };
 
 class IRCTextEntry : public QTextEdit {
@@ -72,7 +76,7 @@ class IRCBufferModel : public QAbstractItemModel {
 	Q_OBJECT;
 public:
 	IRCBufferModel(QTextEdit* edit, QTreeView* view);
-	
+
 	QModelIndex index   (int row, int col, const QModelIndex& parent = QModelIndex()) const override;
 	QModelIndex parent  (const QModelIndex& idx) const override;
 	int rowCount        (const QModelIndex& parent = QModelIndex()) const override;
@@ -114,17 +118,30 @@ public:
 };
 
 
-class IRCGUILogic : public QObject {
+class IRCAddServerUI : public QDialog {
 	Q_OBJECT;
 public:
-	IRCGUILogic(Ui::SamuraIRC* ui, QMainWindow* win);
+	IRCAddServerUI();
+	Ui::AddServer* ui;
+};
+
+
+class IRCMainUI : public QMainWindow {
+	Q_OBJECT;
+public:
+	IRCMainUI(IRCAddServerUI* add_serv);
+
+	Ui::SamuraIRC* ui;
+	IRCBufferModel* buffers;
 public slots:
 	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
 //	bold/italic/etc buttons
 //  context menus
 //  click name to get settings / change name?
 private:
-	Ui::SamuraIRC* ui;
+	QDialog* add_serv;
+	QMenu* buffer_menu;
+	QMenu* nicks_menu;
 	bool max_scroll;
 };
 
@@ -143,7 +160,7 @@ private:
 class IRCMessageHandler : public QObject {
 	Q_OBJECT;
 public:
-	IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui, IRCExternalDownloader* dl);
+	IRCMessageHandler(IRCMainUI* ui, IRCExternalDownloader* dl);
 signals:
 	void tempSend(const QString& chan, const QString& msg);
 	void tempSendRaw(const QString& raw);
@@ -168,7 +185,7 @@ public slots:
 private:
 	IRCExternalDownloader* downloader;
 	IRCBufferModel* buf_model;
-	Ui::SamuraIRC*  ui;
+	Ui::SamuraIRC* ui;
 };
 
 #endif

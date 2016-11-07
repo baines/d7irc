@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>AddServer</class>
+ <widget class="QDialog" name="AddServer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -132,10 +132,18 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="nick"/>
+         <widget class="QLineEdit" name="nick">
+          <property name="placeholderText">
+           <string>samurai</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="address"/>
+         <widget class="QLineEdit" name="address">
+          <property name="placeholderText">
+           <string>irc.example.com</string>
+          </property>
+         </widget>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="L3_port">
@@ -156,6 +164,9 @@
               <width>60</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="placeholderText">
+             <string>6667</string>
             </property>
            </widget>
           </item>
@@ -225,7 +236,11 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="username"/>
+         <widget class="QLineEdit" name="username">
+          <property name="placeholderText">
+           <string>samurai</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="L1_username">
@@ -247,6 +262,9 @@
          <widget class="QLineEdit" name="realname">
           <property name="echoMode">
            <enum>QLineEdit::Normal</enum>
+          </property>
+          <property name="placeholderText">
+           <string>samurai</string>
           </property>
          </widget>
         </item>
@@ -306,7 +324,7 @@
   <connection>
    <sender>buttons</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>AddServer</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -322,7 +340,7 @@
   <connection>
    <sender>buttons</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>AddServer</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

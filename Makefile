@@ -8,10 +8,10 @@ OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
 CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC -g\
  $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets Qt5Network)
 
-d7irc: $(OBJS)
+samurairc: $(OBJS)
 	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lQt5Network -lircclient
 
-build/%.o: src/%.cpp $(UI)
+build/%.o: src/%.cpp $(UI) $(HDRS)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 build/%_ui.h: data/%.ui
@@ -24,7 +24,7 @@ src/%_qrc.cpp: data/%.qrc
 	rcc $< -o $@
 
 clean:
-	$(RM) build/*.h build/*.o d7irc
+	$(RM) build/*.h build/*.o samurairc
 
 .PHONY: clean
 

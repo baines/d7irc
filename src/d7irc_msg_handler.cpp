@@ -4,9 +4,9 @@
 #include <libirc_rfcnumeric.h>
 #include <qscrollbar.h>
 
-IRCMessageHandler::IRCMessageHandler(IRCBufferModel* model, Ui::SamuraIRC* ui, IRCExternalDownloader* dl)
-: buf_model(model)
-, ui(ui)
+IRCMessageHandler::IRCMessageHandler(IRCMainUI* ui, IRCExternalDownloader* dl)
+: buf_model(ui->buffers)
+, ui(ui->ui)
 , downloader(dl) {
 
 }
@@ -149,7 +149,7 @@ void IRCMessageHandler::handleIRCDisconnect(int err, int sub_err){
 }
 
 void IRCMessageHandler::sendIRCMessage(const QString& str){
-	QModelIndex idx = ui->serv_list->currentIndex();
+	QModelIndex idx = ui->buffer_list->currentIndex();
 	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
 	
 	// TODO: server - buffer association

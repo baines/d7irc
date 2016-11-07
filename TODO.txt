@@ -5,7 +5,7 @@
 [ ] - right click nick menu
 [ ] 	- whois, etc
 [ ] 	- if operator, kick, ban, etc
-[ ] - settings dialogue
+[-] - settings dialogue
 [ ] 	- modal window
 [ ]		- QSettings
 [-] - auto download images
@@ -48,3 +48,5 @@
 [ ] - qt5 has broken font-aa on linux, only does greyscale, find good workaround
 		- maybe use pixel font, terminus w/ no aa looks great but has no italics...
 		- also might need to bundle the font as a resource somehow?
+[ ] - QApplication::alert() when no focus + highlight
+[ ] - drag + drop image upload support?

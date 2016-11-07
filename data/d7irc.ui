@@ -104,6 +104,10 @@
   <property name="windowTitle">
    <string>SamuraIRC</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="d7irc.qrc">
+    <normaloff>:/main/icon.png</normaloff>:/main/icon.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: #000;</string>
   </property>
@@ -608,6 +612,16 @@ font: 14pt &quot;Symbola&quot;;</string>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="font">
+            <font>
+             <family>Terminus</family>
+             <pointsize>9</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+             <stylestrategy>NoAntialias</stylestrategy>
+            </font>
+           </property>
            <property name="focusPolicy">
             <enum>Qt::NoFocus</enum>
            </property>
@@ -645,11 +659,33 @@ font: 14pt &quot;Symbola&quot;;</string>
            <height>24</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <family>Terminus</family>
+           <pointsize>9</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <stylestrategy>NoAntialias</stylestrategy>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::StrongFocus</enum>
          </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-color: #17171A;</string>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
          </property>
          <property name="tabStopWidth">
           <number>40</number>
@@ -684,7 +720,7 @@ font: 14pt &quot;Symbola&quot;;</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QTreeView" name="serv_list">
+        <widget class="QTreeView" name="buffer_list">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -711,6 +747,9 @@ font: 14pt &quot;Symbola&quot;;</string>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: #17171A;</string>
@@ -749,8 +788,21 @@ font: 14pt &quot;Symbola&quot;;</string>
            <height>16777214</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <family>Terminus</family>
+           <pointsize>9</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <stylestrategy>NoAntialias</stylestrategy>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: #17171A;</string>
@@ -842,11 +894,6 @@ font: 14pt &quot;Symbola&quot;;</string>
     </item>
    </layout>
   </widget>
-  <action name="actionServer">
-   <property name="text">
-    <string>Server: </string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="2" margin="2"/>
  <customwidgets>
