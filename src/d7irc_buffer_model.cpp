@@ -17,8 +17,6 @@ struct {
 IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
 : root(new IRCBuffer(IRC_BUF_INTERNAL, "root", nullptr)){
 
-	puts("woop");
-
 	beginInsertRows(QModelIndex(), 0, 0);
 	root->child = new IRCBuffer(IRC_BUF_INTERNAL, "SamuraIRC", root);
 	endInsertRows();

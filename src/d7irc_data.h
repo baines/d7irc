@@ -2,7 +2,6 @@
 #define D7IRC_DATA_H
 #include <qtextdocument.h>
 #include <qstring.h>
-#include <qsettings.h>
 #include <vector>
 #include "d7irc_qt.h"
 
@@ -26,11 +25,17 @@ enum IRCBufferLevel : int {
 	IRC_BUFLVL_HIGHLIGHT,
 };
 
-enum IRCOption : int {
-	IRC_OPT_HIDE_JOINPART,
-	IRC_OPT_IMG_EXPAND,
-	IRC_OPT_IMG_EXPAND_ALL,
-	IRC_OPT_CODE_EXPAND,
+enum IRCServerDatum : int {
+	IRC_DAT_UNIQUE_NAME,
+	IRC_DAT_NICK,
+	IRC_DAT_ADDRESS,
+	IRC_DAT_PORT,
+	IRC_DAT_SSL,
+	IRC_DAT_USERNAME,
+	IRC_DAT_REALNAME,
+	IRC_DAT_PASSWORD,
+	IRC_DAT_NICKSERV,
+	IRC_DAT_CMDS,
 };
 
 struct IRCPrefix {
@@ -66,36 +71,6 @@ struct IRCServerBuffer : public IRCBuffer {
 	QString our_nick;
 	std::vector<IRCPrefix> prefixes;
 	// modes?
-};
-
-struct IRCServerDetails {
-	QString unique_name;
-
-	QString hostname;
-	QString nickname;
-	QString username;
-	QString password;
-	uint16_t port;
-	bool ssl;
-
-	// will be of form chan:passwd for passworded channels
-	QStringList channels;
-};
-
-struct IRCSettings {
-	IRCSettings();
-
-	int               serverNameToID (const QString& name);
-	IRCServerDetails* getDetails     (int id);
-
-	int  getOption (IRCOption opt);
-	void setOption (IRCOption opt, int val);
-
-	bool first_run;
-
-private:
-	std::vector<IRCServerDetails> servers;
-	QSettings settings;
 };
 
 #endif

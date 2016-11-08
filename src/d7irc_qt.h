@@ -6,11 +6,13 @@
 #include <qthread.h>
 #include <qtimer.h>
 #include <qdialog.h>
+#include <qsettings.h>
 #include <qmainwindow.h>
 #include <qabstractitemmodel.h>
+#include <qstandarditemmodel.h>
 #include <qabstractitemview.h>
-#include <qsortfilterproxymodel.h>
-#include <qitemdelegate.h>
+#include <qstringlistmodel.h>
+#include <qdatawidgetmapper.h>
 #include <qsocketnotifier.h>
 #include <qnetworkaccessmanager.h>
 #include <qmenu.h>
@@ -30,6 +32,7 @@ namespace Ui {
 	class SamuraIRC;
 	class AddServer;
 };
+
 
 class IRCTextEntry : public QTextEdit {
 	Q_OBJECT;
@@ -94,6 +97,7 @@ private:
 	IRCBuffer* root;
 };
 
+
 class IRCUserModel : public QAbstractTableModel {
 	Q_OBJECT;
 public:
@@ -121,15 +125,17 @@ public:
 class IRCAddServerUI : public QDialog {
 	Q_OBJECT;
 public:
-	IRCAddServerUI();
+	IRCAddServerUI(QWidget* parent);
+private:
 	Ui::AddServer* ui;
+	QDataWidgetMapper mapper;
 };
 
 
 class IRCMainUI : public QMainWindow {
 	Q_OBJECT;
 public:
-	IRCMainUI(IRCAddServerUI* add_serv);
+	IRCMainUI();
 
 	Ui::SamuraIRC* ui;
 	IRCBufferModel* buffers;
@@ -139,7 +145,8 @@ public slots:
 //  context menus
 //  click name to get settings / change name?
 private:
-	QDialog* add_serv;
+	IRCAddServerUI add_serv;
+
 	QMenu* buffer_menu;
 	QMenu* nicks_menu;
 	bool max_scroll;
@@ -187,5 +194,66 @@ private:
 	IRCBufferModel* buf_model;
 	Ui::SamuraIRC* ui;
 };
+
+
+enum IRCOption : int {
+	IRC_OPT_HIDE_JOINPART,
+	IRC_OPT_IMG_EXPAND,
+	IRC_OPT_IMG_EXPAND_ALL,
+	IRC_OPT_CODE_EXPAND,
+};
+
+struct IRCServerDetails {
+
+	IRCServerDetails();
+
+	QString unique_name;
+
+	QString nickname;
+	QString hostname;
+	uint16_t port;
+	bool ssl;
+
+	QString username;
+	QString realname;
+	QString password;
+	QString nickserv;
+
+	QString commands;
+	QStandardItemModel chans;
+};
+
+class IRCSettings : public QAbstractTableModel {
+	Q_OBJECT;
+public:
+	IRCSettings();
+	~IRCSettings();
+
+	int rowCount    (const QModelIndex& p = QModelIndex()) const override;
+	int columnCount (const QModelIndex& p = QModelIndex()) const override;
+	QVariant data   (const QModelIndex& i, int role = Qt::DisplayRole) const override;
+
+	bool setData        (const QModelIndex& i, const QVariant& v, int role = Qt::EditRole) override;
+	Qt::ItemFlags flags (const QModelIndex& i) const override;
+
+	void newServer(void);
+	void delServer(const QModelIndex& i);
+
+	QStandardItemModel* getChannelModel(const QModelIndex& idx);
+
+	int               serverNameToID (const QString& name);
+	IRCServerDetails* getDetails     (int id);
+
+	int  getOption (IRCOption opt);
+	void setOption (IRCOption opt, int val);
+
+	bool first_run;
+
+private:
+	std::vector<IRCServerDetails*> servers;
+	QSettings settings;
+};
+
+extern IRCSettings* d7irc_settings;
 
 #endif

@@ -3,40 +3,18 @@
 #include "d7irc_data.h"
 #include "d7irc_ui.h"
 
-#include <QDebug> 
-#include <QMetaProperty>
-
-#include <vector>
-#include <utility>
-#include <algorithm>
-
-void debug(QObject* o){
-	auto mo = o->metaObject();
-	qDebug() << "## Properties of" << o << "##";
-	do {
-		qDebug() << "### Class" << mo->className() << "###";
-		std::vector<std::pair<QString, QVariant> > v;
-		v.reserve(mo->propertyCount() - mo->propertyOffset());
-		for (int i = mo->propertyOffset(); i < mo->propertyCount();
-			++i)
-			v.emplace_back(mo->property(i).name(),
-						   mo->property(i).read(o));
-		std::sort(v.begin(), v.end());
-		for (auto &i : v)
-			qDebug() << i.first << "=>" << i.second;
-	} while ((mo = mo->superClass()));
-}
+IRCSettings* d7irc_settings;
 
 int main(int argc, char** argv){
 	QApplication app(argc, argv);
 	
-	IRCAddServerUI        add_serv;
-	IRCMainUI             win(&add_serv);
-	IRCSettings           settings;
+	d7irc_settings = new IRCSettings;
+
+	IRCMainUI             win;
 	IRCExternalDownloader downloader;
 	IRCMessageHandler     handler(&win, &downloader);
 
-	if(settings.first_run){
+	if(d7irc_settings->first_run){
 		puts("first run, show add server dialogue when it exists...");
 	}
 
@@ -55,5 +33,9 @@ int main(int argc, char** argv){
 	irc_thread->start();
 
 	win.show();
-	return app.exec();
+	int ret =  app.exec();
+
+	delete d7irc_settings;
+
+	return ret;
 }

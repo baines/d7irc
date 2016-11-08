@@ -4,9 +4,9 @@
 #include <qshortcut.h>
 #include <qdialog.h>
 
-IRCMainUI::IRCMainUI(IRCAddServerUI* add_serv)
+IRCMainUI::IRCMainUI()
 : ui          (new Ui::SamuraIRC)
-, add_serv    (add_serv)
+, add_serv    (this)
 , buffers     (nullptr)
 , buffer_menu (nullptr)
 , nicks_menu  (nullptr)
@@ -15,6 +15,8 @@ IRCMainUI::IRCMainUI(IRCAddServerUI* add_serv)
 	ui->setupUi(this);
 	ui->chat_lines->setCursorWidth(0);
 	ui->text_input->setFocus();
+
+	add_serv.setModal(true);
 
 	buffers     = new IRCBufferModel(ui->chat_lines, ui->buffer_list);
 	buffer_menu = new QMenu(ui->buffer_list);
@@ -67,7 +69,7 @@ IRCMainUI::IRCMainUI(IRCAddServerUI* add_serv)
 	});
 
 	connect(buffer_menu, &QMenu::triggered, [this](QAction* act){
-		this->add_serv->open();
+		add_serv.open();
 	});
 
 }

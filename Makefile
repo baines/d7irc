@@ -1,5 +1,5 @@
 UI   := $(patsubst data/%.ui,build/%_ui.h,$(wildcard data/*.ui))
-MOC  := $(patsubst src/%_qt.h,src/%_qt.cpp,$(wildcard src/*_qt.cpp))
+MOC  := $(patsubst src/%_qt.h,src/%_qt.cpp,$(wildcard src/*_qt.h))
 QRC  := $(patsubst data/%.qrc,src/%_qrc.cpp,$(wildcard data/*.qrc))
 SRCS := $(wildcard src/*.cpp) $(MOC) $(QRC)
 HDRS := $(wildcard src/*.h)
@@ -24,7 +24,7 @@ src/%_qrc.cpp: data/%.qrc
 	rcc $< -o $@
 
 clean:
-	$(RM) build/*.h build/*.o samurairc
+	$(RM) build/*.h build/*.o samurairc $(wildcard src/*_qt.cpp) $(wildcard src/*_qrc.cpp)
 
 .PHONY: clean
 
