@@ -108,7 +108,7 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 	auto* delegate = new IRCChanPassDelegate;
 	ui->chans->setItemDelegate(delegate);
 
-	// TODO: connect chans editing finished to sort + add new row if needed
+	// TODO: on edit finished, sort channels / handle deletion of blank rows?
 	connect(delegate, &IRCChanPassDelegate::updated, [this](const QModelIndex& idx, const QString& txt){
 		auto* model = ui->chans->model();
 		if(!txt.isEmpty() && idx.row() == model->rowCount()-1){
@@ -116,5 +116,19 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 		} else if(txt.isEmpty() && idx.row() == model->rowCount()-2){
 			model->removeRows(model->rowCount()-1, 1);
 		}
+	});
+
+	// advanced toggle
+	connect(ui->group_adv, &QGroupBox::toggled, [this](bool on){
+		auto& children = ui->group_adv->children();
+		for(auto* c : children){
+			auto* w = qobject_cast<QWidget*>(c);
+			if(w) w->setVisible(on);
+		}
+
+		ui->group_cmds->setVisible(on);
+		ui->group_adv->setFlat(!on);
+		ui->group_adv->setStyleSheet(on ? "" : "border:none;");
+
 	});
 }

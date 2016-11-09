@@ -50,3 +50,4 @@
 		- also might need to bundle the font as a resource somehow?
 [ ] - QApplication::alert() when no focus + highlight
 [ ] - drag + drop image upload support?
+[ ] - auto probe port 6697 (ssl), then 6667 - move port/ssl to advanced
