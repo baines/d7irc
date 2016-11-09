@@ -2,7 +2,15 @@
 
 IRCServerDetails::IRCServerDetails()
 : unique_name("New Server") // TODO: make it actually unique...
-, port(6667) {
+, nickname()
+, hostname()
+, port(6667)
+, ssl(false)
+, username()
+, password()
+, nickserv()
+, commands()
+, chans() {
 	chans.setHorizontalHeaderLabels(QStringList({ "Name", "Password" }));
 }
 
@@ -54,8 +62,11 @@ IRCSettings::IRCSettings()
 		settings.endArray();
 		settings.endGroup();
 
+		serv->chans.insertRows(serv->chans.rowCount(), 1);
+
 		servers.push_back(serv);
 	}
+
 }
 
 IRCSettings::~IRCSettings(){
@@ -82,8 +93,10 @@ IRCSettings::~IRCSettings(){
 			QStandardItem* name = s->chans.item(i, 0);
 			QStandardItem* pass = s->chans.item(i, 1);
 
-			settings.setValue("name", name->text());
-			settings.setValue("pass", pass->text());
+			if(name && !name->text().isEmpty()){
+				settings.setValue("name", name->text());
+				settings.setValue("pass", pass ? pass->text() : "");
+			}
 		}
 		settings.endArray();
 		settings.endGroup();

@@ -1,6 +1,29 @@
 #include "d7irc_data.h"
 #include "add_server_ui.h"
 
+QWidget* IRCChanPassDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& s, const QModelIndex& idx) const {
+	QLineEdit* edit = static_cast<QLineEdit*>(QStyledItemDelegate::createEditor(parent, s, idx));
+	if(idx.column() == 1){
+		edit->setEchoMode(QLineEdit::Password);
+	}
+
+	connect(edit, &QLineEdit::textChanged, [=](){
+		emit updated(idx, edit->text());
+	});
+
+	return edit;
+}
+
+
+void IRCChanPassDelegate::paint(QPainter* p, const QStyleOptionViewItem& s, const QModelIndex& idx) const {
+	if(idx.column() == 1){
+		// do nothing for now
+		// TODO: if i can figure out how to draw the password dots here, do that
+	} else {
+		QStyledItemDelegate::paint(p, s, idx);
+	}
+}
+
 IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 : QDialog(parent)
 , ui(new Ui::AddServer)
@@ -43,14 +66,7 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 	connect(
 		ui->serv_list->selectionModel(), &QItemSelectionModel::currentRowChanged,
 		[this](const QModelIndex& idx, const QModelIndex&){
-			printf("idx change %d\n", idx.row());
 			mapper.setCurrentIndex(idx.row());
-		}
-	);
-
-	connect(
-		ui->serv_list->selectionModel(), &QItemSelectionModel::currentChanged,
-		[this](const QModelIndex& idx, const QModelIndex&){
 			ui->chans->setModel(d7irc_settings->getChannelModel(idx));
 		}
 	);
@@ -71,4 +87,34 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 		}
 	});
 
+	// connect button enable/disable
+	connect(ui->address, &QLineEdit::textChanged, [this](const QString& txt){
+		// TODO: store connected state in the server details,
+		// updated by the IRCConnection
+		if(ui->btn_connect->text() == "Connect"){
+			ui->btn_connect->setEnabled(!txt.isEmpty());
+		}
+	});
+
+	connect(ui->btn_connect, &QAbstractButton::clicked, [this](bool){
+		// TODO: get the state from IRCServerDetails, not based on label
+		if(ui->btn_connect->text() == "Connect"){
+			ui->btn_connect->setEnabled(false);
+			ui->btn_connect->setText("Connecting...");
+		}
+	});
+
+	// password echo for channels
+	auto* delegate = new IRCChanPassDelegate;
+	ui->chans->setItemDelegate(delegate);
+
+	// TODO: connect chans editing finished to sort + add new row if needed
+	connect(delegate, &IRCChanPassDelegate::updated, [this](const QModelIndex& idx, const QString& txt){
+		auto* model = ui->chans->model();
+		if(!txt.isEmpty() && idx.row() == model->rowCount()-1){
+			model->insertRows(model->rowCount(), 1);
+		} else if(txt.isEmpty() && idx.row() == model->rowCount()-2){
+			model->removeRows(model->rowCount()-1, 1);
+		}
+	});
 }

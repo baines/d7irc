@@ -5,9 +5,9 @@
 [ ] - right click nick menu
 [ ] 	- whois, etc
 [ ] 	- if operator, kick, ban, etc
-[-] - settings dialogue
-[ ] 	- modal window
-[ ]		- QSettings
+[x] - settings dialogue
+[x] 	- modal window
+[x]		- QSettings
 [-] - auto download images
 [ ] 	- expand/collapse with [+] [-] anchors
 [ ] 	- download all not just imgur

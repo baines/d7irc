@@ -8,6 +8,7 @@
 #include <qdialog.h>
 #include <qsettings.h>
 #include <qmainwindow.h>
+#include <qstyleditemdelegate.h>
 #include <qabstractitemmodel.h>
 #include <qstandarditemmodel.h>
 #include <qabstractitemview.h>
@@ -139,14 +140,14 @@ public:
 
 	Ui::SamuraIRC* ui;
 	IRCBufferModel* buffers;
+	IRCAddServerUI add_serv;
+
 public slots:
 	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
 //	bold/italic/etc buttons
 //  context menus
 //  click name to get settings / change name?
 private:
-	IRCAddServerUI add_serv;
-
 	QMenu* buffer_menu;
 	QMenu* nicks_menu;
 	bool max_scroll;
@@ -222,6 +223,17 @@ struct IRCServerDetails {
 	QString commands;
 	QStandardItemModel chans;
 };
+
+
+class IRCChanPassDelegate : public QStyledItemDelegate {
+	Q_OBJECT;
+public:
+	QWidget* createEditor(QWidget*, const QStyleOptionViewItem&, const QModelIndex&) const override;
+	void paint(QPainter*, const QStyleOptionViewItem&, const QModelIndex&) const override;
+signals:
+	void updated(const QModelIndex& idx, const QString& txt) const;
+};
+
 
 class IRCSettings : public QAbstractTableModel {
 	Q_OBJECT;

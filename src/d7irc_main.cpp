@@ -15,7 +15,7 @@ int main(int argc, char** argv){
 	IRCMessageHandler     handler(&win, &downloader);
 
 	if(d7irc_settings->first_run){
-		puts("first run, show add server dialogue when it exists...");
+		win.add_serv.open();
 	}
 
 	// TODO: move into MainUI constructor?
