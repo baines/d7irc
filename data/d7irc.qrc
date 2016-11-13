@@ -2,4 +2,8 @@
   <qresource prefix="main">
     <file>icon.png</file>
   </qresource>
+  <qresource prefix="servers">
+    <file>twitch.png</file>
+    <file>hmn_logo_color.png</file>
+  </qresource>
 </RCC>

@@ -3,39 +3,49 @@
 #include "d7irc_data.h"
 #include "d7irc_ui.h"
 
-IRCSettings* d7irc_settings;
+IRCCtx* SamuraIRC;
 
 int main(int argc, char** argv){
 	QApplication app(argc, argv);
 	
-	d7irc_settings = new IRCSettings;
+	SamuraIRC              = new IRCCtx;
+	SamuraIRC->settings    = new IRCSettings;
+	SamuraIRC->msg_handler = new IRCMessageHandler;
+	SamuraIRC->downloader  = new IRCExternalDownloader;
+	SamuraIRC->ui_main     = new IRCMainUI;
+	SamuraIRC->ui_addserv  = new IRCAddServerUI;
+	SamuraIRC->buffers     = new IRCBufferModel;
+	SamuraIRC->connections = new IRCConnectionRegistry;
 
-	IRCMainUI             win;
-	IRCExternalDownloader downloader;
-	IRCMessageHandler     handler(&win, &downloader);
+	SamuraIRC->ui_main->hookStuffUp();
 
-	if(d7irc_settings->first_run){
-		win.add_serv.open();
+	if(SamuraIRC->settings->first_run){
+		SamuraIRC->ui_addserv->open();
 	}
 
-	// TODO: move into MainUI constructor?
-	QObject::connect(win.ui->text_input, &IRCTextEntry::textSubmit, &handler, &IRCMessageHandler::sendIRCMessage);
-	QObject::connect(win.ui->text_input, &IRCTextEntry::command   , &handler, &IRCMessageHandler::sendIRCCommand);
-	
 	// TODO: create connections on demand
 	QThread*       irc_thread = new QThread;
-	IRCConnection* connection = new IRCConnection(irc_thread, &handler);
+	IRCConnection* connection = new IRCConnection(0, irc_thread);
 
+	/*
 	//XXX temp: need server param
 	QObject::connect(&handler, &IRCMessageHandler::tempSend   , connection, &IRCConnection::sendPrivmsg, Qt::QueuedConnection);
 	QObject::connect(&handler, &IRCMessageHandler::tempSendRaw, connection, &IRCConnection::sendRaw    , Qt::QueuedConnection);
+	*/
 
 	irc_thread->start();
+	SamuraIRC->ui_main->show();
 
-	win.show();
 	int ret =  app.exec();
-
-	delete d7irc_settings;
-
+	
+	delete SamuraIRC->connections;
+	delete SamuraIRC->buffers;
+	delete SamuraIRC->ui_addserv;
+	delete SamuraIRC->ui_main;
+	delete SamuraIRC->downloader;
+	delete SamuraIRC->msg_handler;
+	delete SamuraIRC->settings;
+	delete SamuraIRC;
+	
 	return ret;
 }

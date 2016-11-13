@@ -1,4 +1,4 @@
-#include "d7irc_data.h"
+#include "d7irc_qt.h"
 #include "add_server_ui.h"
 
 QWidget* IRCChanPassDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& s, const QModelIndex& idx) const {
@@ -24,12 +24,13 @@ void IRCChanPassDelegate::paint(QPainter* p, const QStyleOptionViewItem& s, cons
 	}
 }
 
-IRCAddServerUI::IRCAddServerUI(QWidget* parent)
-: QDialog(parent)
+IRCAddServerUI::IRCAddServerUI()
+: QDialog(SamuraIRC->ui_main)
 , ui(new Ui::AddServer)
 , mapper() {
 
 	ui->setupUi(this);
+	setModal(true);
 
 	// have username / realname mimic nick via placeholder text
 	connect(ui->nick, &QLineEdit::textChanged, [this](){
@@ -43,13 +44,13 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 		ui->realname->setPlaceholderText(text);
 	});
 
-	if(d7irc_settings->rowCount() == 0){
-		d7irc_settings->newServer();
+	if(SamuraIRC->settings->rowCount() == 0){
+		SamuraIRC->settings->newServer();
 	}
 
 	// widget mapping
-	ui->serv_list->setModel(d7irc_settings);
-	mapper.setModel(d7irc_settings);
+	ui->serv_list->setModel(SamuraIRC->settings);
+	mapper.setModel(SamuraIRC->settings);
 
 	mapper.addMapping(ui->nick    , IRC_DAT_NICK);
 	mapper.addMapping(ui->address , IRC_DAT_ADDRESS);
@@ -67,23 +68,23 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 		ui->serv_list->selectionModel(), &QItemSelectionModel::currentRowChanged,
 		[this](const QModelIndex& idx, const QModelIndex&){
 			mapper.setCurrentIndex(idx.row());
-			ui->chans->setModel(d7irc_settings->getChannelModel(idx));
+			ui->chans->setModel(SamuraIRC->settings->getChannelModel(idx));
 		}
 	);
 
-	ui->serv_list->setCurrentIndex(d7irc_settings->index(0, 0));
+	ui->serv_list->setCurrentIndex(SamuraIRC->settings->index(0, 0));
 
 	// + button
-	connect(ui->btn_addserv, &QAbstractButton::clicked, [](bool){
-		d7irc_settings->newServer();
+	connect(ui->btn_addserv, &QAbstractButton::clicked, [=](bool){
+		SamuraIRC->settings->newServer();
 	});
 
 	// - button
-	connect(ui->btn_delserv, &QAbstractButton::clicked, [this](bool){
+	connect(ui->btn_delserv, &QAbstractButton::clicked, [=](bool){
 		// TODO: clear all fields if pressed when only one server?
-		if(d7irc_settings->rowCount() > 1){
+		if(SamuraIRC->settings->rowCount() > 1){
 			QModelIndex idx = ui->serv_list->currentIndex();
-			d7irc_settings->delServer(idx);
+			SamuraIRC->settings->delServer(idx);
 		}
 	});
 
@@ -129,6 +130,6 @@ IRCAddServerUI::IRCAddServerUI(QWidget* parent)
 		ui->group_cmds->setVisible(on);
 		ui->group_adv->setFlat(!on);
 		ui->group_adv->setStyleSheet(on ? "" : "border:none;");
-
 	});
+	ui->group_adv->setChecked(false);
 }

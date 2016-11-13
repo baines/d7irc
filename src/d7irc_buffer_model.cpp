@@ -1,4 +1,5 @@
-#include "d7irc_data.h"
+#include "d7irc_qt.h"
+#include "d7irc_ui.h"
 #include <qtreeview.h>
 #include <cassert>
 
@@ -14,7 +15,7 @@ struct {
 	{ { 0xff, 0x00, 0x00 }, R"xx(  "YMmMY" YMM   ""`MMM  M'  "MMM"YmmMMMM""MMMM   "W"YMM   ""`MMMMMMM   "W"  "YUMMMMMP")xx" },
 };
 
-IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
+IRCBufferModel::IRCBufferModel()
 : root(new IRCBuffer(IRC_BUF_INTERNAL, "root", nullptr)){
 
 	beginInsertRows(QModelIndex(), 0, 0);
@@ -35,10 +36,12 @@ IRCBufferModel::IRCBufferModel(QTextEdit* edit, QTreeView* view)
 	c.insertText(" v0.0.0 by Alex Baines");
 	c.endEditBlock();
 
-	edit->setDocument(root->child->contents);
-
-	view->setModel(this);
-	view->setCurrentIndex(createIndex(0, 0, root->child));
+	auto* ui = SamuraIRC->ui_main->ui;
+	ui->chat_lines->setDocument(root->child->contents);
+	ui->buffer_list->setModel(this);
+	ui->buffer_list->setCurrentIndex(createIndex(0, 0, root->child));
+	
+	connect(this, &IRCBufferModel::serverAdded, ui->buffer_list, &QTreeView::expand);
 }
 
 QModelIndex IRCBufferModel::index(int row, int col, const QModelIndex& parent) const {

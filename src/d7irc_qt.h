@@ -10,7 +10,6 @@
 #include <qmainwindow.h>
 #include <qstyleditemdelegate.h>
 #include <qabstractitemmodel.h>
-#include <qstandarditemmodel.h>
 #include <qabstractitemview.h>
 #include <qstringlistmodel.h>
 #include <qdatawidgetmapper.h>
@@ -20,20 +19,26 @@
 #include <qtreeview.h>
 #include <libircclient.h>
 #include <memory>
+#include "d7irc_data.h"
 
-#define DEFAULT_PREFIX_IDX 0xFFFF
+
+// forward declarations
 
 struct IRCBuffer;
 struct IRCServerBuffer;
 
+class IRCExternalDownloader;
 class IRCMessageHandler;
-class QMainWindow;
+class IRCMainUI;
+class IRCBufferModel;
 
 namespace Ui {
 	class SamuraIRC;
 	class AddServer;
 };
 
+
+// Subclass to handle return, tab, and sizing logic of the text entry field
 
 class IRCTextEntry : public QTextEdit {
 	Q_OBJECT;
@@ -49,37 +54,69 @@ private:
 	int line_count;
 };
 
+// There is one IRCConnection object for each server connection.
+// They're all running on the same IRC thread (separate from main thread).
 
 class IRCConnection : public QObject {
 	Q_OBJECT;
 public:
-	IRCConnection(QThread* thread, IRCMessageHandler* handler);
-	QString server;
+	IRCConnection   (int id, QThread* thread);
+	const int our_id;
 signals:
-	void connect (const QString& serv);
-	void join    (const QString& serv, const QString& chan, const QString& user);
-	void part    (const QString& serv, const QString& chan, const QString& user);
-	void quit    (const QString& serv, const QString& user, const QString& msg);
-	void privmsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
-	void nick    (const QString& serv, const QString& user, const QString& new_nick);
-	void numeric (const QString& serv, unsigned event, QStringList data);
-
-	void disconnect (int err, int sub_err);
+	void connect    (int id);
+	void join       (int id, const QString& chan, const QString& user);
+	void part       (int id, const QString& chan, const QString& user);
+	void quit       (int id, const QString& user, const QString& msg);
+	void privmsg    (int id, const QString& from, const QString& to, const QString& msg);
+	void nick       (int id, const QString& user, const QString& new_nick);
+	void numeric    (int id, unsigned event, QStringList data);
+	void disconnect (int id, int err, int sub_err);
 public slots:
-	void begin();
-	void tick();
-	void sendPrivmsg(const QString& target, const QString& msg);
-	void sendRaw(const QString& raw);
+	void begin       ();
+	void tick        ();
+	void sendPrivMsg (int id, const QString& target, const QString& msg);
+	void sendRawMsg  (int id, const QString& raw);
 private:
 	std::vector<std::unique_ptr<QSocketNotifier>> notifiers;
 	irc_session_t* irc_session;
 };
 
 
+// There is a single IRCMessageHandler on the main thread that has signal/slot
+// connections to each IRCConnection on the IRC thread
+
+class IRCMessageHandler : public QObject {
+	Q_OBJECT;
+signals:
+	void dispatchPrivMsg (int id, const QString& chan, const QString& msg);
+	void dispatchRawMsg  (int id, const QString& raw);
+public slots:
+
+	// from server to us
+	void handleIRCConnect (int id);
+	void handleIRCJoin    (int id, const QString& chan, const QString& user);
+	void handleIRCPart    (int id, const QString& chan, const QString& user);
+	void handleIRCQuit    (int id, const QString& user, const QString& msg);
+	void handleIRCNick    (int id, const QString& user, const QString& new_nick);
+	void handleIRCPrivMsg (int id, const QString& from, const QString& to, const QString& msg);
+	void handleIRCNumeric (int id, uint32_t event, QStringList data);
+
+	void handleIRCDisconnect (int id, int err, int sub_err);
+
+	// from us to server
+
+	void sendIRCMessage (const QString& text);
+	void sendIRCCommand (const QString& cmd);
+};
+
+
+// The buffer model stores all the buffers in a way compatible with qt's model/view
+// stuff, so that they can be displayed on the side pane.
+
 class IRCBufferModel : public QAbstractItemModel {
 	Q_OBJECT;
 public:
-	IRCBufferModel(QTextEdit* edit, QTreeView* view);
+	IRCBufferModel();
 
 	QModelIndex index   (int row, int col, const QModelIndex& parent = QModelIndex()) const override;
 	QModelIndex parent  (const QModelIndex& idx) const override;
@@ -90,7 +127,7 @@ public:
 
 	IRCServerBuffer* addServer  (const QString& name);
 	IRCBuffer*       addChannel (const QString& serv, const QString& chan);
-	IRCBuffer*       getDefault  ();
+	IRCBuffer*       getDefault ();
 
 signals:
 	void serverAdded (const QModelIndex& idx);
@@ -98,6 +135,8 @@ private:
 	IRCBuffer* root;
 };
 
+
+// The user model is another qt compatible model for the nick list side pane.
 
 class IRCUserModel : public QAbstractTableModel {
 	Q_OBJECT;
@@ -123,25 +162,26 @@ public:
 };
 
 
+// Widget on which the "Add server" UI is created, containing the corresponding UI logic.
+
 class IRCAddServerUI : public QDialog {
 	Q_OBJECT;
 public:
-	IRCAddServerUI(QWidget* parent);
-private:
+	IRCAddServerUI();
 	Ui::AddServer* ui;
+private:
 	QDataWidgetMapper mapper;
 };
 
+
+// Widget on which the main UI is created and handled.
 
 class IRCMainUI : public QMainWindow {
 	Q_OBJECT;
 public:
 	IRCMainUI();
-
+	void hookStuffUp();
 	Ui::SamuraIRC* ui;
-	IRCBufferModel* buffers;
-	IRCAddServerUI add_serv;
-
 public slots:
 	void bufferChange (const QModelIndex& idx, const QModelIndex& prev);
 //	bold/italic/etc buttons
@@ -154,10 +194,10 @@ private:
 };
 
 
+// class to manage downloading external images and code snippets.
+
 class IRCExternalDownloader : public QObject {
 	Q_OBJECT;
-public:
-	IRCExternalDownloader() = default;
 public slots:
 	void checkMessage(const QString& msg, IRCBuffer* buf);
 private:
@@ -165,65 +205,8 @@ private:
 };
 
 
-class IRCMessageHandler : public QObject {
-	Q_OBJECT;
-public:
-	IRCMessageHandler(IRCMainUI* ui, IRCExternalDownloader* dl);
-signals:
-	void tempSend(const QString& chan, const QString& msg);
-	void tempSendRaw(const QString& raw);
-public slots:
-
-	// from server to us
-	void handleIRCConnect (const QString& serv);
-	void handleIRCJoin    (const QString& serv, const QString& chan, const QString& user);
-	void handleIRCPart    (const QString& serv, const QString& chan, const QString& user);
-	void handleIRCQuit    (const QString& serv, const QString& user, const QString& msg);
-	void handleIRCNick    (const QString& serv, const QString& user, const QString& new_nick);
-	void handleIRCPrivMsg (const QString& serv, const QString& from, const QString& to, const QString& msg);
-	void handleIRCNumeric (const QString& serv, uint32_t event, QStringList data);
-
-	void handleIRCDisconnect (int err, int sub_err);
-
-	// from us to server
-
-	void sendIRCMessage (const QString& text);
-	void sendIRCCommand (const QString& cmd);
-
-private:
-	IRCExternalDownloader* downloader;
-	IRCBufferModel* buf_model;
-	Ui::SamuraIRC* ui;
-};
-
-
-enum IRCOption : int {
-	IRC_OPT_HIDE_JOINPART,
-	IRC_OPT_IMG_EXPAND,
-	IRC_OPT_IMG_EXPAND_ALL,
-	IRC_OPT_CODE_EXPAND,
-};
-
-struct IRCServerDetails {
-
-	IRCServerDetails();
-
-	QString unique_name;
-
-	QString nickname;
-	QString hostname;
-	uint16_t port;
-	bool ssl;
-
-	QString username;
-	QString realname;
-	QString password;
-	QString nickserv;
-
-	QString commands;
-	QStandardItemModel chans;
-};
-
+// This thing is necessary to hide the passwords in the table of channels
+// in the "Add server" UI.
 
 class IRCChanPassDelegate : public QStyledItemDelegate {
 	Q_OBJECT;
@@ -234,6 +217,9 @@ signals:
 	void updated(const QModelIndex& idx, const QString& txt) const;
 };
 
+
+// This is another qt model that holds the settings for each server, as well
+// as global settings / config options for the whole program.
 
 class IRCSettings : public QAbstractTableModel {
 	Q_OBJECT;
@@ -262,10 +248,9 @@ public:
 	bool first_run;
 
 private:
+	uint64_t id_counter;
 	std::vector<IRCServerDetails*> servers;
 	QSettings settings;
 };
-
-extern IRCSettings* d7irc_settings;
 
 #endif

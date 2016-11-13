@@ -1,3 +1,4 @@
+#include "d7irc_qt.h"
 #include "d7irc_data.h"
 #include <qtexttable.h>
 #include <qdebug.h>
@@ -7,7 +8,7 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 , name(name)
 , contents(new QTextDocument)
 , cursor(contents)
-, nicks(parent)
+, nicks(new IRCUserModel(parent))
 , inactive(false)
 , level(IRC_BUFLVL_NORMAL)
 , parent(parent)

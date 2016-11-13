@@ -5,9 +5,7 @@
 #include <qdialog.h>
 
 IRCMainUI::IRCMainUI()
-: ui          (new Ui::SamuraIRC)
-, add_serv    (this)
-, buffers     (nullptr)
+: ui          (new Ui::SamuraIRC) 
 , buffer_menu (nullptr)
 , nicks_menu  (nullptr)
 , max_scroll  (true) {
@@ -16,15 +14,13 @@ IRCMainUI::IRCMainUI()
 	ui->chat_lines->setCursorWidth(0);
 	ui->text_input->setFocus();
 
-	add_serv.setModal(true);
-
-	buffers     = new IRCBufferModel(ui->chat_lines, ui->buffer_list);
 	buffer_menu = new QMenu(ui->buffer_list);
 	nicks_menu  = new QMenu(ui->nick_list);
+}
+
+void IRCMainUI::hookStuffUp(void){
 
 	connect(ui->buffer_list->selectionModel(), &QItemSelectionModel::currentChanged, this, &IRCMainUI::bufferChange);
-
-	connect(buffers, &IRCBufferModel::serverAdded, ui->buffer_list, &QTreeView::expand);
 
 	// alt+up/down for buffer list
 	QShortcut* next_buf = new QShortcut(QKeySequence(Qt::Key_Down | Qt::AltModifier), this);
@@ -68,10 +64,14 @@ IRCMainUI::IRCMainUI()
 		buffer_menu->popup(ui->buffer_list->mapToGlobal(p));
 	});
 
-	connect(buffer_menu, &QMenu::triggered, [this](QAction* act){
-		add_serv.open();
+	connect(buffer_menu, &QMenu::triggered, [](QAction* act){
+		SamuraIRC->ui_addserv->open();
 	});
 
+	auto* handler = SamuraIRC->msg_handler;
+
+	connect(ui->text_input, &IRCTextEntry::textSubmit, handler, &IRCMessageHandler::sendIRCMessage);
+	connect(ui->text_input, &IRCTextEntry::command   , handler, &IRCMessageHandler::sendIRCCommand);
 }
 
 void IRCMainUI::bufferChange(const QModelIndex& idx, const QModelIndex&){
@@ -82,5 +82,5 @@ void IRCMainUI::bufferChange(const QModelIndex& idx, const QModelIndex&){
 	QScrollBar* s = ui->chat_lines->verticalScrollBar();
 	s->setValue(s->maximum());
 
-	ui->nick_list->setModel(&buf->nicks);
+	ui->nick_list->setModel(buf->nicks);
 }

@@ -17,6 +17,7 @@
 [ ] - commands
 [-] 	- /join
 [ ] 	- /connect
+[ ] 		- auto complete server names
 [-] 	- /nick
 [-] 	- /me
 [ ] - nick label
@@ -51,3 +52,4 @@
 [ ] - QApplication::alert() when no focus + highlight
 [ ] - drag + drop image upload support?
 [ ] - auto probe port 6697 (ssl), then 6667 - move port/ssl to advanced
+[ ] - change "Nickserv Pass" label to combobox for more auth methods like sasl
