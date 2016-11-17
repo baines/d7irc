@@ -25,7 +25,6 @@
 // forward declarations
 
 struct IRCBuffer;
-struct IRCServerBuffer;
 
 class IRCExternalDownloader;
 class IRCMessageHandler;
@@ -54,14 +53,16 @@ private:
 	int line_count;
 };
 
+
 // There is one IRCConnection object for each server connection.
 // They're all running on the same IRC thread (separate from main thread).
 
 class IRCConnection : public QObject {
 	Q_OBJECT;
 public:
-	IRCConnection   (int id, QThread* thread);
-	const int our_id;
+	IRCConnection    (int id, const IRCServerDetails& details, QThread* thread);
+	IRCServerDetails details;
+	const int        our_id;
 signals:
 	void connect    (int id);
 	void join       (int id, const QString& chan, const QString& user);
@@ -125,9 +126,13 @@ public:
 	QVariant data       (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 	Qt::ItemFlags flags (const QModelIndex& idx) const override;
 
-	IRCServerBuffer* addServer  (const QString& name);
-	IRCBuffer*       addChannel (const QString& serv, const QString& chan);
-	IRCBuffer*       getDefault ();
+	IRCBuffer* addServer  (const QString& name);
+	IRCBuffer* addChannel (const QString& serv, const QString& chan);
+
+	IRCBuffer* getDefault ();
+
+	IRCBuffer* findServer  (const QString& name);
+	IRCBuffer* findChannel (const QString& serv, const QString& chan);
 
 signals:
 	void serverAdded (const QModelIndex& idx);
@@ -141,24 +146,46 @@ private:
 class IRCUserModel : public QAbstractTableModel {
 	Q_OBJECT;
 public:
-	IRCUserModel(IRCBuffer* container);
-
+	
 	int rowCount    (const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount (const QModelIndex& parent = QModelIndex()) const override;
 	QVariant data   (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 
-	void add (const QString& nick, int prefix_idx = DEFAULT_PREFIX_IDX);
+	void add (const QString& nick, IRCPrefix* prefix = nullptr);
 	bool del (const QString& nick);
 
 	static QColor nickColor(const QString& nick);
 
 	struct User {
 		QString nick;
-		int prefix_idx;
+		IRCPrefix prefix;
 	};
 
 	std::vector<User> nicks;
-	IRCBuffer* server;
+};
+
+
+// another model for channels in the 'add server' UI
+
+class IRCChannelModel : public QAbstractTableModel {
+	Q_OBJECT;
+public:
+	int rowCount    (const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount (const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data   (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
+
+	QVariant headerData (int col, Qt::Orientation, int role = Qt::DisplayRole) const override;
+
+	bool setData        (const QModelIndex& i, const QVariant& v, int role = Qt::EditRole) override;
+	Qt::ItemFlags flags (const QModelIndex& i) const override;
+
+	void push();
+	void pop();
+
+	void setChannels(std::vector<IRCChanDetails>* chans);
+
+private:
+	std::vector<IRCChanDetails>* chans;
 };
 
 
@@ -171,6 +198,7 @@ public:
 	Ui::AddServer* ui;
 private:
 	QDataWidgetMapper mapper;
+	IRCChannelModel chan_model;
 };
 
 
@@ -205,6 +233,7 @@ private:
 };
 
 
+
 // This thing is necessary to hide the passwords in the table of channels
 // in the "Add server" UI.
 
@@ -237,7 +266,7 @@ public:
 	void newServer(void);
 	void delServer(const QModelIndex& i);
 
-	QStandardItemModel* getChannelModel(const QModelIndex& idx);
+	std::vector<IRCChanDetails>* getChannelDetails(const QModelIndex& idx);
 
 	int               serverNameToID (const QString& name);
 	IRCServerDetails* getDetails     (int id);
@@ -252,5 +281,7 @@ private:
 	std::vector<IRCServerDetails*> servers;
 	QSettings settings;
 };
+
+Q_DECLARE_METATYPE(IRCServerDetails);
 
 #endif

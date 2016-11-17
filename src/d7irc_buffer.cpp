@@ -8,7 +8,7 @@ IRCBuffer::IRCBuffer(IRCBufferType type, const QString& name, IRCBuffer* parent)
 , name(name)
 , contents(new QTextDocument)
 , cursor(contents)
-, nicks(new IRCUserModel(parent))
+, nicks(new IRCUserModel)
 , inactive(false)
 , level(IRC_BUFLVL_NORMAL)
 , parent(parent)
@@ -115,11 +115,4 @@ void IRCBuffer::addImage(const QImage& img){
 	cursor.currentTable()->appendRows(1);
 	cursor.movePosition(QTextCursor::NextRow);
 	cursor.insertImage(img);
-}
-
-IRCServerBuffer::IRCServerBuffer(const QString& name, IRCBuffer* parent)
-: IRCBuffer(IRC_BUF_SERVER, name, parent)
-, our_nick()
-, prefixes({ { '@', 'o' }, { '%', 'h' }, { '+', 'v' }}) {
-
 }

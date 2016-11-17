@@ -5,11 +5,11 @@ SRCS := $(wildcard src/*.cpp) $(MOC) $(QRC)
 HDRS := $(wildcard src/*.h)
 OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
 
-CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC -g\
+CFLAGS := -std=c++14 -Isrc -Ibuild -fPIC -g -Ibuild/libircclient-1.9/include\
  $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets Qt5Network)
 
 samurairc: $(OBJS)
-	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lQt5Network -lircclient
+	$(CXX) $(CFLAGS) $^ -o $@ -lQt5Core -lQt5Gui -lQt5Widgets -lQt5Network build/libircclient.a -lssl -lcrypto
 
 build/%.o: src/%.cpp $(UI) $(HDRS)
 	$(CXX) $(CFLAGS) -c $< -o $@

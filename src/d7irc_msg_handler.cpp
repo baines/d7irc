@@ -88,20 +88,20 @@ void IRCMessageHandler::handleIRCPrivMsg(int id, const QString& from, const QStr
 // TODO: use prefixes in server buf instead?
 static const char nick_start_symbols[] = "[]\\`_^{|}";
 
-int get_prefix_idx(IRCServerBuffer* serv, char prefix){
-
-	for(int i = 0; i < serv->prefixes.size(); ++i){
-		if(serv->prefixes[i].prefix == prefix){
-			return i;
+IRCPrefix* get_prefix(IRCConnectionInfo* info, char prefix){
+	for(int i = 0; i < info->prefixes.size(); ++i){
+		if(info->prefixes[i].symbol == prefix){
+			return &info->prefixes[i];
 		}
 	}
-
-	return -1;
+	return nullptr;
 }
 
 void IRCMessageHandler::handleIRCNumeric(int id, uint32_t event, QStringList data){
 	const auto& serv = serv_id2name(id);
-	IRCServerBuffer* sbuf = SamuraIRC->buffers->addServer(serv);
+	IRCBuffer* sbuf  = SamuraIRC->buffers->addServer(serv);
+
+	IRCConnectionInfo* info = SamuraIRC->connections->getInfo(id);
 
 	switch(event){
 		case LIBIRC_RFC_RPL_NAMREPLY: {
@@ -114,7 +114,7 @@ void IRCMessageHandler::handleIRCNumeric(int id, uint32_t event, QStringList dat
 				char c = names[i].toLatin1().constData()[0];
 
 				if(!isalpha(c) && !strchr(nick_start_symbols, c)){
-					buf->nicks->add(names[i].mid(1), get_prefix_idx(sbuf, c));
+					buf->nicks->add(names[i].mid(1), get_prefix(info, c));
 				} else {
 					buf->nicks->add(names[i]);
 				}
@@ -134,9 +134,14 @@ void IRCMessageHandler::handleIRCNumeric(int id, uint32_t event, QStringList dat
 					QString prefixes = pre_reg.cap(2);
 					if(modes.size() != prefixes.size()) return;
 
-					sbuf->prefixes.clear();
+					info->prefixes.clear();
 					for(int i = 0; i < modes.size(); ++i){
-						sbuf->prefixes.push_back(IRCPrefix { prefixes[i].toLatin1(), modes[i].toLatin1() });
+						IRCPrefix p = {
+							i,
+							prefixes[i].toLatin1(),
+							modes[i].toLatin1()
+						};
+						info->prefixes.push_back(p);
 					}
 				}
 			}

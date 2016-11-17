@@ -9,7 +9,7 @@
 
 // defines / macros
 
-#define DEFAULT_PREFIX_IDX 0xFFFF
+#define EMPTY_PREFIX_IDX 0xFFFF
 
 // forward declarations
 
@@ -73,10 +73,22 @@ enum IRCConnectionStatus : int {
 
 // data types
 
+// stores an IRC prefix, which consists of:
+//   an index of importance (lower index == higher importance)
+//   a symbol such as @ (operator), % (half-op), etc
+//   a mode character - e.g. o for operator, since /mode +o gives op
+
 struct IRCPrefix {
-	char prefix;
+	int  index;
+	char symbol;
 	char mode;
+
+	static IRCPrefix empty() { return IRCPrefix { EMPTY_PREFIX_IDX, 0, 0 }; }
+	static bool isEmpty(const IRCPrefix& p){ return p.index == EMPTY_PREFIX_IDX; }
 };
+
+
+// type used to store info for each buffer that appears in the list on the side pane.
 
 struct IRCBuffer {
 
@@ -100,18 +112,20 @@ struct IRCBuffer {
 	IRCBuffer* sibling;
 };
 
-// TODO: put this stuff in IRCServerDetails instead probably
-struct IRCServerBuffer : public IRCBuffer {
-	IRCServerBuffer(const QString& name, IRCBuffer* parent);
+// simple struct for holding channels in server details
 
-	int id;
-	QString our_nick;
-	std::vector<IRCPrefix> prefixes;
-	// modes?
+struct IRCChanDetails {
+	QString name;
+	QString pass;
 };
+
+// holds the saved details of a server that was added via the add-server ui
+// or loaded from the ini config file. The unique ID is chosen at runtime and
+// might change for different instances of the program.
 
 struct IRCServerDetails {
 
+	IRCServerDetails() = default;
 	IRCServerDetails(int id);
 
 	int unique_id;
@@ -128,12 +142,26 @@ struct IRCServerDetails {
 	QString nickserv;
 
 	QString commands;
-	QStandardItemModel chans;
+	std::vector<IRCChanDetails> chans;
 
 	bool autoconnect;
 
 	IRCConnectionStatus status;
 };
+
+
+// holds information about a current connection to a server.
+// the ID will match one of the IRCServerDetails IDs
+
+struct IRCConnectionInfo {
+	int id;
+	IRCConnection* conn;
+	QString current_nick;
+	std::vector<IRCPrefix> prefixes;
+};
+
+
+// holds the list of all such current connections.
 
 struct IRCConnectionRegistry {
 	IRCConnectionRegistry();
@@ -141,10 +169,15 @@ struct IRCConnectionRegistry {
 	bool createConnection(int id);
 	bool destroyConnection(int id);
 
+	IRCConnectionInfo* getInfo(int id);
+
 private:
 	QThread* irc_thread;
-	std::vector<IRCConnection*> connections;
+	std::vector<IRCConnectionInfo> connections;
 };
+
+
+// global context struct for easy access of stuff.
 
 struct IRCCtx {
 	IRCSettings*           settings;

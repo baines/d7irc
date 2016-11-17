@@ -6,7 +6,10 @@
 IRCCtx* SamuraIRC;
 
 int main(int argc, char** argv){
+
 	QApplication app(argc, argv);
+
+	qRegisterMetaType<IRCServerDetails>();
 	
 	SamuraIRC              = new IRCCtx;
 	SamuraIRC->settings    = new IRCSettings;
@@ -23,9 +26,8 @@ int main(int argc, char** argv){
 		SamuraIRC->ui_addserv->open();
 	}
 
-	// TODO: create connections on demand
-	QThread*       irc_thread = new QThread;
-	IRCConnection* connection = new IRCConnection(0, irc_thread);
+	// TODO: iterate the settings, and create any 'autoconnect' servers
+	SamuraIRC->connections->createConnection(0);
 
 	/*
 	//XXX temp: need server param
@@ -33,10 +35,9 @@ int main(int argc, char** argv){
 	QObject::connect(&handler, &IRCMessageHandler::tempSendRaw, connection, &IRCConnection::sendRaw    , Qt::QueuedConnection);
 	*/
 
-	irc_thread->start();
 	SamuraIRC->ui_main->show();
 
-	int ret =  app.exec();
+	int ret = app.exec();
 	
 	delete SamuraIRC->connections;
 	delete SamuraIRC->buffers;

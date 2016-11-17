@@ -12,25 +12,23 @@ IRCServerDetails::IRCServerDetails(int id)
 , nickserv()
 , commands()
 , chans() {
-	chans.setHorizontalHeaderLabels(QStringList({ "Name", "Password" }));
+
 }
 
 IRCSettings::IRCSettings()
-: id_counter(0)
+: first_run(false)
+, id_counter(0)
 , servers()
 , settings(QSettings::IniFormat, QSettings::UserScope, "samurairc") {
 	settings.setFallbacksEnabled(false);
-	first_run = settings.value("main/first_run", true).toBool();
-	settings.setValue("main/first_run", false);
-	settings.sync();
-	{
-		QFile file(settings.fileName());
-		file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
-	}
 
 	// load servers etc
 	static QRegExp serv_key_regex("^serv\\..*");
 	QStringList keys = settings.childGroups().filter(serv_key_regex);
+
+	if(keys.isEmpty()){
+		first_run = true;
+	}
 
 	for(auto& k : keys){
 
@@ -43,7 +41,7 @@ IRCSettings::IRCSettings()
 		settings.beginGroup(k);
 
 		serv->nickname = settings.value("nickname", "samurai").toString();
-		serv->hostname = settings.value("hostname", "irc.example.com").toString();
+		serv->hostname = settings.value("hostname", "").toString();
 		serv->port     = settings.value("port"    , 6667).toUInt();
 		serv->ssl      = settings.value("ssl"     , false).toBool();
 
@@ -63,13 +61,13 @@ IRCSettings::IRCSettings()
 			QString pass = settings.value("pass", "").toString();
 
 			if(!name.isEmpty()){
-				serv->chans.appendRow(QList<QStandardItem*>({ new QStandardItem(name), new QStandardItem(pass) }));
+				serv->chans.push_back(IRCChanDetails { name, pass });
 			}
 		}
 		settings.endArray();
 		settings.endGroup();
 
-		serv->chans.insertRows(serv->chans.rowCount(), 1);
+		serv->chans.push_back(IRCChanDetails{});
 
 		servers.push_back(serv);
 	}
@@ -103,15 +101,15 @@ IRCSettings::~IRCSettings(){
 		settings.setValue("commands", s->commands);
 
 		settings.beginWriteArray("channels");
-		for(int i = 0; i < s->chans.rowCount(); ++i){
+		for(int i = 0; i < s->chans.size(); ++i){
 			settings.setArrayIndex(i);
 
-			QStandardItem* name = s->chans.item(i, 0);
-			QStandardItem* pass = s->chans.item(i, 1);
+			const QString& name = s->chans[i].name;
+			const QString& pass = s->chans[i].pass;
 
-			if(name && !name->text().isEmpty()){
-				settings.setValue("name", name->text());
-				settings.setValue("pass", pass ? pass->text() : "");
+			if(!name.isEmpty()){
+				settings.setValue("name", name);
+				settings.setValue("pass", pass);
 			}
 		}
 		settings.endArray();
@@ -221,17 +219,19 @@ Qt::ItemFlags IRCSettings::flags(const QModelIndex&) const {
 void IRCSettings::newServer(){
 	beginInsertRows(QModelIndex(), servers.size(), servers.size());
 	servers.push_back(new IRCServerDetails(id_counter++));
+	servers.back()->chans.push_back(IRCChanDetails{});
 	endInsertRows();
 }
 
 void IRCSettings::delServer(const QModelIndex& i){
 	beginRemoveRows(QModelIndex(), i.row(), i.row());
+	delete servers[i.row()];
 	servers.erase(servers.begin() + i.row());
 	endRemoveRows();
 }
 
 
-QStandardItemModel* IRCSettings::getChannelModel(const QModelIndex& idx){
+std::vector<IRCChanDetails>* IRCSettings::getChannelDetails(const QModelIndex& idx){
 	return &servers[idx.row()]->chans;
 }
 

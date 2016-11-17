@@ -5,61 +5,56 @@
 
 static void
 irc_connect(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
-	emit w->connect(w->our_id);
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
+	emit conn->connect(conn->our_id);
 
-	// XXX remove later, get channels from IRCSettings
-#if 1
-	irc_cmd_join(s, "#random", NULL);
-	irc_cmd_join(s, "#dev", NULL);
-	irc_cmd_join(s, "#hmn", NULL);
-	irc_cmd_join(s, "#hero", NULL);
-#else 
-	irc_cmd_join(s, "##linux", NULL);
-#endif
+	for(const auto& c : conn->details.chans){
+		// TODO: should these be done more incrementally?
+		irc_cmd_join(s, c.name.toUtf8().constData(), c.pass.isEmpty() ? NULL : c.pass.toUtf8().constData());
+	}
 }
 
 static void
 irc_join(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
-	emit w->join(w->our_id, argv[0], origin);
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
+	emit conn->join(conn->our_id, argv[0], origin);
 }
 
 static void
 irc_part(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
-	emit w->part(w->our_id, argv[0], origin);
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
+	emit conn->part(conn->our_id, argv[0], origin);
 }
 
 static void
 irc_quit(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
 	QString quit_msg;
 	for(int i = 0; i < n; ++i){
 		quit_msg += argv[i];
 	}
-	emit w->quit(w->our_id, origin, quit_msg);
+	emit conn->quit(conn->our_id, origin, quit_msg);
 }
 
 static void
 irc_privmsg(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
 	QString msg;
 	if(n > 1 && argv[1]){
 		msg = argv[1];
 	}
-	emit w->privmsg(w->our_id, origin, argv[0], msg);
+	emit conn->privmsg(conn->our_id, origin, argv[0], msg);
 }
 
 static void
 irc_nick(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
-	emit w->nick(w->our_id, origin, argv[0]);
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
+	emit conn->nick(conn->our_id, origin, argv[0]);
 }
 
 static void
 irc_action(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
 
 	char nick[1024] = "";
 	irc_target_get_nick(origin, nick, sizeof(nick)-1);
@@ -70,14 +65,14 @@ irc_action(irc_session_t* s, const char*, const char* origin, const char** argv,
 		msg += argv[1];
 	}
 
-	emit w->privmsg(w->our_id, "*", argv[0], msg);
+	emit conn->privmsg(conn->our_id, "*", argv[0], msg);
 }
 
 /*
 static void
 irc_mode(irc_session_t* s, const char*, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
-	emit w->join(w->server, argv[0], origin);
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
+	emit conn->join(conn->server, argv[0], origin);
 }
 */
 
@@ -86,13 +81,13 @@ irc_mode(irc_session_t* s, const char*, const char* origin, const char** argv, u
 
 static void
 irc_numeric(irc_session_t* s, unsigned ev, const char* origin, const char** argv, unsigned n){
-	IRCConnection* w = static_cast<IRCConnection*>(irc_get_ctx(s));
+	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
 	QStringList list;
 	for(int i = 0; i < n; ++i){
 		list << argv[i];
 	}
 
-	emit w->numeric(w->our_id, ev, list);
+	emit conn->numeric(conn->our_id, ev, list);
 }
 
 // if only c++ had designated initializers ._.
@@ -113,12 +108,11 @@ extern "C" {
 }
 
 // TODO: we need to be given the server ID in IRCSettings
-IRCConnection::IRCConnection(int id, QThread* thread)
-: our_id(id)
+IRCConnection::IRCConnection(int id, const IRCServerDetails& details, QThread* thread)
+: details(details)
+, our_id(id)
 , notifiers()
 , irc_session(nullptr) {
-
-	QObject::connect(thread, &QThread::started, this, &IRCConnection::begin);
 
 	IRCMessageHandler* handler = SamuraIRC->msg_handler;
 
@@ -136,28 +130,41 @@ IRCConnection::IRCConnection(int id, QThread* thread)
 }
 
 void IRCConnection::begin(){
+
 	irc_session = irc_create_session(&irc_callbacks);
 	if(!irc_session){
 		emit disconnect(our_id, IRC_ERR_CREATE_SESSION, irc_errno(irc_session));
 		return;
 	}
 
-#if 0
-	const char* temp_connect = "irc.handmade.network";
-	int port = 7666;
-#else
-	const char* temp_connect = "127.0.0.1";
-	int port = 6667;
-#endif
-
-	//TODO: get nick, user, real name etc from IRCSettings
-	const char* temp_name = "d12ninja";
-
 	irc_set_ctx(irc_session, this);
 
-	//TODO: ssl prepend # logic
-	// also, irc_connect6?
-	if(irc_connect(irc_session, temp_connect, port, NULL, temp_name, temp_name, temp_name) != 0){
+	// TODO: make this a setting
+	irc_option_set(irc_session, LIBIRC_OPTION_SSL_NO_VERIFY);
+
+	if(details.ssl && !details.hostname.startsWith("#")){
+		details.hostname.prepend("#");
+	}
+
+	if(details.username.isEmpty()){
+		details.username = details.nickname;
+	}
+
+	if(details.realname.isEmpty()){
+		details.realname = details.nickname;
+	}
+
+	int err = irc_connect(
+		irc_session,
+		details.hostname.toUtf8().constData(),
+		details.port,
+		details.password.isEmpty() ? NULL : details.password.toUtf8().constData(),
+		details.nickname.toUtf8().constData(),
+		details.username.toUtf8().constData(),
+		details.realname.toUtf8().constData()
+	);
+
+	if(err != 0){
 		emit disconnect(our_id, IRC_ERR_CONNECT, irc_errno(irc_session));
 		return;
 	}

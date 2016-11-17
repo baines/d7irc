@@ -164,7 +164,7 @@ Qt::ItemFlags IRCBufferModel::flags(const QModelIndex& idx) const {
 	return QAbstractItemModel::flags(idx);
 }
 
-IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
+IRCBuffer* IRCBufferModel::addServer(const QString& name){
 
 	int row = 1;
 	IRCBuffer** p = &root->child->sibling;
@@ -175,10 +175,10 @@ IRCServerBuffer* IRCBufferModel::addServer(const QString& name){
 
 	if(*p && (*p)->name == name){
 		assert((*p)->type == IRC_BUF_SERVER);
-		return reinterpret_cast<IRCServerBuffer*>(*p);
+		return *p;
 	}
 
-	IRCServerBuffer* buf = new IRCServerBuffer(name, root);
+	IRCBuffer* buf = new IRCBuffer(IRC_BUF_SERVER, name, root);
 
 	beginInsertRows(QModelIndex(), row, row);
 	buf->sibling = *p;

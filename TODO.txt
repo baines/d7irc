@@ -31,7 +31,6 @@
 [ ] - logging
 [ ] - irc color formatting
 [ ]		- convert control codes to html
-[ ] - server / internal buffers
 [ ] - file transfers
 [ ] - split privmsg from chanmsg
 [-] - server / channel classes derived from buffer?
@@ -40,7 +39,7 @@
 [ ] - tab autocomplete nicks
 [ ] - fix expanding text input with resize / backspace
 [ ] - topic bar, appears when (h)op, or when topic is set?
-[ ] - ssl support
+[x] - ssl support
 [x] - alt+up/down changes buffer
 [ ] - colour highlight buffers with activity / pings
 [ ] - option to hide join/parts with keybind

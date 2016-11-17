@@ -1,3 +1,4 @@
+#include <cassert>
 #include "d7irc_qt.h"
 #include "add_server_ui.h"
 
@@ -27,10 +28,12 @@ void IRCChanPassDelegate::paint(QPainter* p, const QStyleOptionViewItem& s, cons
 IRCAddServerUI::IRCAddServerUI()
 : QDialog(SamuraIRC->ui_main)
 , ui(new Ui::AddServer)
-, mapper() {
+, mapper()
+, chan_model() {
 
 	ui->setupUi(this);
 	setModal(true);
+	ui->chans->setModel(&chan_model);
 
 	// have username / realname mimic nick via placeholder text
 	connect(ui->nick, &QLineEdit::textChanged, [this](){
@@ -68,7 +71,8 @@ IRCAddServerUI::IRCAddServerUI()
 		ui->serv_list->selectionModel(), &QItemSelectionModel::currentRowChanged,
 		[this](const QModelIndex& idx, const QModelIndex&){
 			mapper.setCurrentIndex(idx.row());
-			ui->chans->setModel(SamuraIRC->settings->getChannelModel(idx));
+			auto* vec = SamuraIRC->settings->getChannelDetails(idx);
+			chan_model.setChannels(vec);
 		}
 	);
 
@@ -111,11 +115,13 @@ IRCAddServerUI::IRCAddServerUI()
 
 	// TODO: on edit finished, sort channels / handle deletion of blank rows?
 	connect(delegate, &IRCChanPassDelegate::updated, [this](const QModelIndex& idx, const QString& txt){
-		auto* model = ui->chans->model();
+		auto* model = qobject_cast<IRCChannelModel*>(ui->chans->model());
+		assert(model);
+
 		if(!txt.isEmpty() && idx.row() == model->rowCount()-1){
-			model->insertRows(model->rowCount(), 1);
+			model->push();
 		} else if(txt.isEmpty() && idx.row() == model->rowCount()-2){
-			model->removeRows(model->rowCount()-1, 1);
+			model->pop();
 		}
 	});
 
