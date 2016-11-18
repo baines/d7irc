@@ -12,7 +12,7 @@ int main(int argc, char** argv){
 	qRegisterMetaType<IRCServerDetails>();
 	
 	SamuraIRC              = new IRCCtx;
-	SamuraIRC->settings    = new IRCSettings;
+	SamuraIRC->servers     = new IRCServerModel;
 	SamuraIRC->msg_handler = new IRCMessageHandler;
 	SamuraIRC->downloader  = new IRCExternalDownloader;
 	SamuraIRC->ui_main     = new IRCMainUI;
@@ -23,10 +23,10 @@ int main(int argc, char** argv){
 	SamuraIRC->ui_main->hookStuffUp();
 	SamuraIRC->ui_addserv->hookStuffUp();
 
-	if(SamuraIRC->settings->first_run){
+	if(SamuraIRC->servers->begin() == SamuraIRC->servers->end()){
 		SamuraIRC->ui_addserv->open();
 	} else {
-		for(auto* serv : *SamuraIRC->settings){
+		for(auto* serv : *SamuraIRC->servers){
 			if(serv->autoconnect){
 				SamuraIRC->connections->createConnection(serv->id);
 			}
@@ -49,7 +49,7 @@ int main(int argc, char** argv){
 	delete SamuraIRC->ui_main;
 	delete SamuraIRC->downloader;
 	delete SamuraIRC->msg_handler;
-	delete SamuraIRC->settings;
+	delete SamuraIRC->servers;
 	delete SamuraIRC;
 	
 	return ret;

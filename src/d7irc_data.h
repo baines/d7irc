@@ -9,13 +9,14 @@
 
 // defines / macros
 
+#define D7IRC_VERSTR "v0.0.0"
 #define EMPTY_PREFIX_IDX 0xFFFF
 
 // forward declarations
 
 class IRCUserModel;
 class IRCConnection;
-class IRCSettings;
+class IRCServerModel;
 class IRCMainUI;
 class IRCAddServerUI;
 class IRCExternalDownloader;
@@ -64,6 +65,7 @@ enum IRCServerDatum : int {
 	IRC_DAT_PASSWORD,
 	IRC_DAT_NICKSERV,
 	IRC_DAT_CMDS,
+	IRC_DAT_AUTOCONNECT,
 };
 
 enum IRCConnectionStatus : int {
@@ -127,7 +129,7 @@ struct IRCChanDetails {
 struct IRCServerDetails {
 
 	IRCServerDetails() = default;
-	IRCServerDetails(int id);
+	IRCServerDetails(int id, const QString& name);
 
 	int id;
 	QString unique_name;
@@ -164,7 +166,8 @@ struct IRCConnectionInfo {
 // global context struct for easy access of stuff.
 
 struct IRCCtx {
-	IRCSettings*           settings;
+	IRCServerModel*        servers;
+//	IRCPreferences*        prefs;
 	IRCMessageHandler*     msg_handler;
 	IRCExternalDownloader* downloader;
 	IRCMainUI*             ui_main;

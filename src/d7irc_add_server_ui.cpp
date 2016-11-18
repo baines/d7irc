@@ -29,7 +29,9 @@ IRCAddServerUI::IRCAddServerUI()
 : QDialog(SamuraIRC->ui_main)
 , ui(new Ui::AddServer)
 , mapper()
-, chan_model() {
+, chan_model()
+, icon_connect(":/main/connect.png")
+, icon_disconnect(":/main/disconnect.png"){
 
 	ui->setupUi(this);
 	setModal(true);
@@ -50,13 +52,13 @@ void IRCAddServerUI::hookStuffUp(){
 		ui->realname->setPlaceholderText(text);
 	});
 
-	if(SamuraIRC->settings->rowCount() == 0){
-		SamuraIRC->settings->newServer();
+	if(SamuraIRC->servers->rowCount() == 0){
+		SamuraIRC->servers->newServer();
 	}
 
 	// widget mapping
-	ui->serv_list->setModel(SamuraIRC->settings);
-	mapper.setModel(SamuraIRC->settings);
+	ui->serv_list->setModel(SamuraIRC->servers);
+	mapper.setModel(SamuraIRC->servers);
 
 	mapper.addMapping(ui->nick    , IRC_DAT_NICK);
 	mapper.addMapping(ui->address , IRC_DAT_ADDRESS);
@@ -70,6 +72,8 @@ void IRCAddServerUI::hookStuffUp(){
 
 	mapper.addMapping(ui->cmds, IRC_DAT_CMDS);
 
+	mapper.addMapping(ui->autoconnect, IRC_DAT_AUTOCONNECT);
+
 	// server selection change
 	connect(
 		ui->serv_list->selectionModel(), &QItemSelectionModel::currentRowChanged,
@@ -77,11 +81,11 @@ void IRCAddServerUI::hookStuffUp(){
 
 			// update models
 			mapper.setCurrentIndex(idx.row());
-			auto* vec = SamuraIRC->settings->getChannelDetails(idx);
+			auto* vec = SamuraIRC->servers->getChannelDetails(idx);
 			chan_model.setChannels(vec);
 
 			// disable delete button if connected
-			IRCServerDetails*  serv = SamuraIRC->settings->getDetailsFromModelIdx(idx);
+			IRCServerDetails*  serv = SamuraIRC->servers->getDetailsFromModelIdx(idx);
 			IRCConnectionInfo* info = SamuraIRC->connections->getInfo(serv->id);
 			ui->btn_delserv->setEnabled(!info);
 
@@ -89,10 +93,12 @@ void IRCAddServerUI::hookStuffUp(){
 			// TODO: disconnected state probably unnecessary
 			if(!info || info->status == IRC_CON_DISCONNECTED){
 				ui->btn_connect->setText("Connect");
-				ui->btn_connect->setEnabled(true);
+				ui->btn_connect->setIcon(icon_connect);
+				ui->btn_connect->setEnabled(!ui->address->text().isEmpty());
 			} else if(info->status == IRC_CON_CONNECTED){
 				ui->btn_connect->setText("Disconnect");
 				ui->btn_connect->setEnabled(true);
+				ui->btn_connect->setIcon(icon_disconnect);
 			} else if(info->status == IRC_CON_CONNECTING){
 				// TODO: we might want to be able to disconnect even while the connection
 				// is in progress...
@@ -102,37 +108,44 @@ void IRCAddServerUI::hookStuffUp(){
 		}
 	);
 
-	ui->serv_list->setCurrentIndex(SamuraIRC->settings->index(0, 0));
+	ui->serv_list->setCurrentIndex(SamuraIRC->servers->index(0, 0));
 
 	// + button
 	connect(ui->btn_addserv, &QAbstractButton::clicked, [=](bool){
-		SamuraIRC->settings->newServer();
+		SamuraIRC->servers->newServer();
 	});
 
 	// - button
 	connect(ui->btn_delserv, &QAbstractButton::clicked, [=](bool){
 		// TODO: clear all fields if pressed when only one server?
-		if(SamuraIRC->settings->rowCount() > 1){
+		if(SamuraIRC->servers->rowCount() > 1){
 			QModelIndex idx = ui->serv_list->currentIndex();
-			IRCServerDetails* serv = SamuraIRC->settings->getDetailsFromModelIdx(idx);
-			SamuraIRC->settings->delServer(idx);
+			IRCServerDetails* serv = SamuraIRC->servers->getDetailsFromModelIdx(idx);
+			SamuraIRC->servers->delServer(idx);
 		}
 	});
 
 	// (dis)connect button
 	connect(ui->btn_connect, &QAbstractButton::clicked, [this](bool){
-		auto* serv = SamuraIRC->settings->getDetailsFromModelIdx(ui->serv_list->currentIndex());
+		auto* serv = SamuraIRC->servers->getDetailsFromModelIdx(ui->serv_list->currentIndex());
 		auto* info = SamuraIRC->connections->getInfo(serv->id);
 
 		if(info){ // disconnect
 			SamuraIRC->connections->destroyConnection(serv->id);
 			ui->btn_connect->setText("Connect");
 			ui->btn_connect->setEnabled(true);
+			ui->btn_connect->setIcon(icon_connect);
 		} else {  // connect
 			SamuraIRC->connections->createConnection(serv->id);
 			ui->btn_connect->setText("Connecting...");
 			ui->btn_connect->setEnabled(false);
+			ui->btn_connect->setIcon(icon_disconnect);
 		}
+	});
+
+	// disable connect if no addr
+	connect(ui->address, &QLineEdit::textChanged, [this](){
+		ui->btn_connect->setEnabled(!ui->address->text().isEmpty());
 	});
 
 	// password echo for channels
@@ -170,7 +183,7 @@ void IRCAddServerUI::hookStuffUp(){
 	connect(
 		SamuraIRC->connections, &IRCConnectionRegistry::statusChanged,
 		[this](int id, IRCConnectionStatus status){
-			auto* serv = SamuraIRC->settings->getDetailsFromModelIdx(ui->serv_list->currentIndex());
+			auto* serv = SamuraIRC->servers->getDetailsFromModelIdx(ui->serv_list->currentIndex());
 			if(serv->id != id) return;
 
 			ui->btn_connect->setEnabled(status != IRC_CON_CONNECTING);

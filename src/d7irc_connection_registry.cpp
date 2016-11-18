@@ -14,7 +14,7 @@ IRCConnectionRegistry::IRCConnectionRegistry(){
 bool IRCConnectionRegistry::createConnection(int id){
 	// TODO: check if it already exists first
 
-	IRCServerDetails* details = SamuraIRC->settings->getDetails(id);
+	IRCServerDetails* details = SamuraIRC->servers->getDetails(id);
 	if(!details){
 		return false;
 	}
@@ -41,7 +41,7 @@ bool IRCConnectionRegistry::createConnection(int id){
 }
 
 bool IRCConnectionRegistry::destroyConnection(int id){
-	IRCServerDetails* details = SamuraIRC->settings->getDetails(id);
+	IRCServerDetails* details = SamuraIRC->servers->getDetails(id);
 	if(!details){
 		return false;
 	}

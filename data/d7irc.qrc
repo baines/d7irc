@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="main">
+    <file>disconnect.png</file>
+    <file>connect.png</file>
     <file>icon.png</file>
   </qresource>
   <qresource prefix="servers">

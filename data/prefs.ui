@@ -109,7 +109,7 @@
               <widget class="QComboBox" name="comboBox">
                <item>
                 <property name="text">
-                 <string>[Builtin] Beep</string>
+                 <string>[Builtin] Ping</string>
                 </property>
                </item>
                <item>

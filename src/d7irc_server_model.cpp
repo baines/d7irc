@@ -1,8 +1,9 @@
 #include "d7irc_qt.h"
+#include <qmimedata.h>
 
-IRCServerDetails::IRCServerDetails(int id)
+IRCServerDetails::IRCServerDetails(int id, const QString& name)
 : id(id)
-, unique_name("New Server") // TODO: make it actually unique...
+, unique_name(name)
 , nickname()
 , hostname()
 , port(6667)
@@ -16,9 +17,8 @@ IRCServerDetails::IRCServerDetails(int id)
 
 }
 
-IRCSettings::IRCSettings()
-: first_run(false)
-, id_counter(0)
+IRCServerModel::IRCServerModel()
+: id_counter(0)
 , servers()
 , settings(QSettings::IniFormat, QSettings::UserScope, "samurairc") {
 	settings.setFallbacksEnabled(false);
@@ -27,17 +27,12 @@ IRCSettings::IRCSettings()
 	static QRegExp serv_key_regex("^serv\\..*");
 	QStringList keys = settings.childGroups().filter(serv_key_regex);
 
-	if(keys.isEmpty()){
-		first_run = true;
-	}
-
 	for(auto& k : keys){
 
 		printf("key: %s\n", k.toUtf8().constData());
 
-		IRCServerDetails* serv = new IRCServerDetails(id_counter++);
-
-		serv->unique_name = k.mid(5);
+		// TODO: check user hasn't screwed up the uniqueness of the name via manually editing the .ini?
+		IRCServerDetails* serv = new IRCServerDetails(id_counter++, k.mid(5));
 
 		settings.beginGroup(k);
 
@@ -53,6 +48,8 @@ IRCSettings::IRCSettings()
 		serv->password = settings.value("password", "").toString();
 		serv->nickserv = settings.value("nickserv", "").toString();
 		serv->commands = settings.value("commands", "").toString();
+
+		serv->autoconnect = settings.value("autoconnect", false).toBool();
 
 		int nchans = settings.beginReadArray("channels");
 		for(int i = 0; i < nchans; ++i){
@@ -75,7 +72,7 @@ IRCSettings::IRCSettings()
 
 }
 
-IRCSettings::~IRCSettings(){
+IRCServerModel::~IRCServerModel(){
 
 	settings.clear();
 	settings.setValue("main/first_run", false);
@@ -119,15 +116,15 @@ IRCSettings::~IRCSettings(){
 
 }
 
-int IRCSettings::rowCount(const QModelIndex&) const {
+int IRCServerModel::rowCount(const QModelIndex&) const {
 	return servers.size();
 }
 
-int IRCSettings::columnCount(const QModelIndex&) const {
-	return 10;
+int IRCServerModel::columnCount(const QModelIndex&) const {
+	return 11;
 }
 
-QVariant IRCSettings::data(const QModelIndex& idx, int role) const {
+QVariant IRCServerModel::data(const QModelIndex& idx, int role) const {
 
 	if(role == Qt::SizeHintRole && idx.column() == 0){
 		return QSize(-1, 20);
@@ -160,6 +157,8 @@ QVariant IRCSettings::data(const QModelIndex& idx, int role) const {
 			return serv.nickserv;
 		case IRC_DAT_CMDS:
 			return serv.commands;
+		case IRC_DAT_AUTOCONNECT:
+			return serv.autoconnect;
 		default:
 			return QVariant();
 	}
@@ -176,9 +175,10 @@ static const int col_types[] = {
 	QMetaType::QString,
 	QMetaType::QString,
 	QMetaType::QString,
+	QMetaType::Bool,
 };
 
-bool IRCSettings::setData(const QModelIndex& idx, const QVariant& val, int role){
+bool IRCServerModel::setData(const QModelIndex& idx, const QVariant& val, int role){
 	if(role != Qt::EditRole) return false;
 	if(!val.canConvert(col_types[idx.column()])) return false;
 
@@ -186,8 +186,20 @@ bool IRCSettings::setData(const QModelIndex& idx, const QVariant& val, int role)
 
 	switch(idx.column()){
 		case IRC_DAT_UNIQUE_NAME: {
-			// TODO: change buffer name if it exists
-			serv.unique_name = val.toString();
+			QString wanted_name = val.toString();
+			for(auto* s : servers){
+				if(s->unique_name == wanted_name){
+					return false;
+				}
+			}
+#if 0
+			// TODO: the buffers would need to be re-sorted?
+			if(IRCBuffer* buf = SamuraIRC->buffers->findServer(serv.unique_name)){
+				buf->name = wanted_name;
+			}
+#endif
+			
+			serv.unique_name = wanted_name;
 		} break;
 		case IRC_DAT_NICK:
 			serv.nickname = val.toString(); break;
@@ -207,44 +219,105 @@ bool IRCSettings::setData(const QModelIndex& idx, const QVariant& val, int role)
 			 serv.nickserv = val.toString(); break;
 		case IRC_DAT_CMDS:
 			 serv.commands = val.toString(); break;
+		case IRC_DAT_AUTOCONNECT:
+			 serv.autoconnect = val.toBool(); break;
 		default: return false;
 	}
 
 	return true;
 }
 
-Qt::ItemFlags IRCSettings::flags(const QModelIndex&) const {
-	return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+bool IRCServerModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int to_row, int to_col, const QModelIndex &parent) {
+	if(!data->hasFormat("application/x-qabstractitemmodeldatalist")) return false;
+	if(action != Qt::MoveAction) return false;
+	if(parent.model() != this) return false;
+
+	if(to_row == -1 && to_col == -1){
+		to_row = parent.row();
+		to_col = parent.column();
+	}
+
+	if(to_col != IRC_DAT_UNIQUE_NAME) return false;
+
+	QByteArray  bytes  (data->data("application/x-qabstractitemmodeldatalist"));
+	QDataStream stream (&bytes, QIODevice::ReadOnly);
+
+	if(stream.atEnd()) return false;
+
+	int from_row, from_col;
+	stream >> from_row >> from_col;
+
+	if(from_col != IRC_DAT_UNIQUE_NAME) return false;
+	if(from_row == to_row) return false;
+
+	if(from_row < to_row){
+		beginMoveRows(QModelIndex(), from_row, from_row, QModelIndex(), to_row+1);
+	} else {
+		beginMoveRows(QModelIndex(), from_row, from_row, QModelIndex(), to_row);
+	}
+	auto* tmp = servers[from_row];
+	servers.erase(servers.begin() + from_row);
+	servers.insert(servers.begin() + to_row, tmp);
+	endMoveRows();
+
+	return true;
 }
 
-void IRCSettings::newServer(){
+Qt::ItemFlags IRCServerModel::flags(const QModelIndex& idx) const {
+	Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+	if(idx.column() == IRC_DAT_UNIQUE_NAME){
+		flags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+	}
+	return flags;
+}
+
+Qt::DropActions IRCServerModel::supportedDropActions() const {
+	return Qt::MoveAction;
+}
+
+void IRCServerModel::newServer(){
+	QString new_name("New Server");
+	bool found;
+	int count = 0;
+
+	do {
+		found = true;
+		for(auto* s : servers){
+			if(s->unique_name == new_name){
+				found = false;
+				new_name = QString("New Server #%1").arg(++count);
+				break;
+			}
+		}
+	} while(!found);
+
 	beginInsertRows(QModelIndex(), servers.size(), servers.size());
-	servers.push_back(new IRCServerDetails(id_counter++));
+	servers.push_back(new IRCServerDetails(id_counter++, new_name));
 	servers.back()->chans.push_back(IRCChanDetails{});
 	endInsertRows();
 }
 
-void IRCSettings::delServer(const QModelIndex& i){
+void IRCServerModel::delServer(const QModelIndex& i){
 	beginRemoveRows(QModelIndex(), i.row(), i.row());
 	delete servers[i.row()];
 	servers.erase(servers.begin() + i.row());
 	endRemoveRows();
 }
 
-IRCServerDetails* IRCSettings::getDetailsFromModelIdx(const QModelIndex& i){
+IRCServerDetails* IRCServerModel::getDetailsFromModelIdx(const QModelIndex& i){
 	return servers[i.row()];
 }
 
-std::vector<IRCChanDetails>* IRCSettings::getChannelDetails(const QModelIndex& idx){
+std::vector<IRCChanDetails>* IRCServerModel::getChannelDetails(const QModelIndex& idx){
 	return &servers[idx.row()]->chans;
 }
 
 
-int IRCSettings::serverNameToID(const QString& name){
+int IRCServerModel::serverNameToID(const QString& name){
 	return -1;
 }
 
-IRCServerDetails* IRCSettings::getDetails(int id){
+IRCServerDetails* IRCServerModel::getDetails(int id){
 	for(auto* s : servers){
 		if(s->id == id){
 			return s;
@@ -254,18 +327,10 @@ IRCServerDetails* IRCSettings::getDetails(int id){
 	return nullptr;
 }
 
-int getOption(IRCOption opt){
-	return 0;
-}
-
-void setOption(IRCOption opt, int val){
-
-}
-
-IRCServerDetails** IRCSettings::begin(){
+IRCServerDetails** IRCServerModel::begin(){
 	return servers.data();
 }
 
-IRCServerDetails** IRCSettings::end(){
+IRCServerDetails** IRCServerModel::end(){
 	return servers.data() + servers.size();
 }

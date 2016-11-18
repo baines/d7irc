@@ -207,6 +207,8 @@ public:
 private:
 	QDataWidgetMapper mapper;
 	IRCChannelModel chan_model;
+	QIcon icon_connect;
+	QIcon icon_disconnect;
 };
 
 
@@ -258,11 +260,11 @@ signals:
 // This is another qt model that holds the settings for each server, as well
 // as global settings / config options for the whole program.
 
-class IRCSettings : public QAbstractTableModel {
+class IRCServerModel : public QAbstractTableModel {
 	Q_OBJECT;
 public:
-	IRCSettings();
-	~IRCSettings();
+	IRCServerModel();
+	~IRCServerModel();
 
 	int rowCount    (const QModelIndex& p = QModelIndex()) const override;
 	int columnCount (const QModelIndex& p = QModelIndex()) const override;
@@ -270,6 +272,9 @@ public:
 
 	bool setData        (const QModelIndex& i, const QVariant& v, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags (const QModelIndex& i) const override;
+	bool dropMimeData   (const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+
+	Qt::DropActions supportedDropActions() const override;
 
 	void newServer(void);
 	void delServer(const QModelIndex& i);
@@ -283,11 +288,6 @@ public:
 
 	IRCServerDetails** begin          (void);
 	IRCServerDetails** end            (void);
-
-	int  getOption (IRCOption opt);
-	void setOption (IRCOption opt, int val);
-
-	bool first_run;
 
 private:
 	uint64_t id_counter;

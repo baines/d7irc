@@ -174,12 +174,28 @@ void IRCConnection::start(){
 }
 
 void IRCConnection::stop(){
-	//TODO: send quit message?
+	if(irc_cmd_quit(irc_session, "SamuraIRC " D7IRC_VERSTR) != 0){
+		fprintf(stderr, "quit: %s\n", irc_strerror(irc_errno(irc_session)));
+	} else {
+		while(irc_is_connected(irc_session)){
+			int max_fd = 0;
+			struct timeval tv = {};
+			fd_set in, out;
+			FD_ZERO(&in);
+			FD_ZERO(&out);
+
+			if(irc_add_select_descriptors(irc_session, &in, &out, &max_fd) != 0) break;
+			if(select(max_fd + 1, &in, &out, NULL, &tv) < 0) break;
+			if(irc_process_select_descriptors(irc_session, &in, &out) != 0) break;
+		}
+	}
 
 	if(irc_is_connected(irc_session)){
 		irc_disconnect(irc_session);
 	}
+
 	irc_destroy_session(irc_session);
+
 	notifiers.clear();
 
 	emit disconnect(our_id, IRC_ERR_NONE, 0);

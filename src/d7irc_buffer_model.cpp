@@ -33,7 +33,7 @@ IRCBufferModel::IRCBufferModel()
 		c.insertText("\n");
 	}
 	c.setCharFormat(QTextCharFormat());
-	c.insertText(" v0.0.0 by Alex Baines");
+	c.insertText(" " D7IRC_VERSTR " by Alex Baines");
 	c.endEditBlock();
 
 	auto* ui = SamuraIRC->ui_main->ui;

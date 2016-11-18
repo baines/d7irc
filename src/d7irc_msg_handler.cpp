@@ -6,13 +6,13 @@
 #include <cassert>
 
 QString serv_id2name(int id){
-	auto* serv = SamuraIRC->settings->getDetails(id);
+	auto* serv = SamuraIRC->servers->getDetails(id);
 	assert(serv);
 	return serv->unique_name;
 }
 
 void IRCMessageHandler::handleIRCConnect(int id){
-	IRCServerDetails& serv = *SamuraIRC->settings->getDetails(id);
+	IRCServerDetails& serv = *SamuraIRC->servers->getDetails(id);
 
 	for(auto& c : serv.chans){
 		if(c.name.isEmpty()) continue;
@@ -29,7 +29,7 @@ void IRCMessageHandler::handleIRCConnect(int id){
 }
 
 void IRCMessageHandler::handleIRCJoin(int id, const QString& chan, const QString& user){
-	IRCServerDetails& serv = *SamuraIRC->settings->getDetails(id);
+	IRCServerDetails& serv = *SamuraIRC->servers->getDetails(id);
 
 	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv.unique_name, chan);
 
@@ -43,9 +43,8 @@ void IRCMessageHandler::handleIRCJoin(int id, const QString& chan, const QString
 }
 
 void IRCMessageHandler::handleIRCPart(int id, const QString& chan, const QString& user){
-	IRCServerDetails&  serv = *SamuraIRC->settings->getDetails(id);
+	IRCServerDetails&  serv = *SamuraIRC->servers->getDetails(id);
 	IRCConnectionInfo& info = *SamuraIRC->connections->getInfo(id);
-
 
 	// TODO: findChannel
 	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv.unique_name, chan);
