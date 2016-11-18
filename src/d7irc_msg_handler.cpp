@@ -5,32 +5,58 @@
 #include <qscrollbar.h>
 #include <cassert>
 
-static const QString& serv_id2name(int id){
-	auto* info = SamuraIRC->settings->getDetails(id);
-	assert(info);
-	return info->unique_name;
+QString serv_id2name(int id){
+	auto* serv = SamuraIRC->settings->getDetails(id);
+	assert(serv);
+	return serv->unique_name;
 }
 
 void IRCMessageHandler::handleIRCConnect(int id){
-	const auto& serv = serv_id2name(id);
+	IRCServerDetails& serv = *SamuraIRC->settings->getDetails(id);
 
-	SamuraIRC->buffers->addServer(serv);
+	for(auto& c : serv.chans){
+		if(c.name.isEmpty()) continue;
+		IRCBuffer* cbuf = SamuraIRC->buffers->addChannel(serv.unique_name, c.name);
+		cbuf->addLine("--", "Joining channel...");
+	}
+
+	IRCBuffer* sbuf = SamuraIRC->buffers->addServer(serv.unique_name);
+	sbuf->addLine("--", "Connected!");
+	sbuf->active = true;
+	SamuraIRC->buffers->markBufferDirty(sbuf);
+
+	SamuraIRC->connections->setStatus(id, IRC_CON_CONNECTED);
 }
 
 void IRCMessageHandler::handleIRCJoin(int id, const QString& chan, const QString& user){
-	const auto& serv = serv_id2name(id);
+	IRCServerDetails& serv = *SamuraIRC->settings->getDetails(id);
 
-	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv, chan);
+	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv.unique_name, chan);
+
+	if(!buf->active){
+		buf->active = true;
+		SamuraIRC->buffers->markBufferDirty(buf);
+	}
+
 	buf->addLine("-->", user);
 	buf->nicks->add(user);
 }
 
 void IRCMessageHandler::handleIRCPart(int id, const QString& chan, const QString& user){
-	const auto& serv = serv_id2name(id);
+	IRCServerDetails&  serv = *SamuraIRC->settings->getDetails(id);
+	IRCConnectionInfo& info = *SamuraIRC->connections->getInfo(id);
 
-	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv, chan);
+
+	// TODO: findChannel
+	IRCBuffer* buf = SamuraIRC->buffers->addChannel(serv.unique_name, chan);
 	if(buf->nicks->del(user)){
 		buf->addLine("<--", user);
+	}
+	
+	// TODO: make a util::user2nick();
+	if(info.current_nick == user){
+		buf->active = false;
+		SamuraIRC->buffers->markBufferDirty(buf);
 	}
 }
 
@@ -159,11 +185,22 @@ void IRCMessageHandler::handleIRCDisconnect(int id, int err, int sub_err){
 
 	if(err == IRC_ERR_SELECT){
 		fprintf(stderr, "Disconnected: %d: %s\n", err, strerror(sub_err));
-	} else {
+	} else if(err != IRC_ERR_NONE){
 		fprintf(stderr, "Disconnected: %d: %s\n", err, irc_strerror(sub_err));
 	}
 
-	//TODO: mark relevent buffers inactive
+	IRCBuffer* buf = SamuraIRC->buffers->addServer(serv);
+	buf->addLine("--", "Disconnected from server.");
+	buf->active = false;
+	SamuraIRC->buffers->markBufferDirty(buf);
+
+	for(IRCBuffer* c = buf->child; c; c = c->sibling){
+		c->addLine("--", "Disconnected from server.");
+		c->nicks->clear();
+		c->active = false;
+		SamuraIRC->buffers->markBufferDirty(c);
+	}
+
 }
 
 void IRCMessageHandler::sendIRCMessage(const QString& str){

@@ -73,7 +73,8 @@ signals:
 	void numeric    (int id, unsigned event, QStringList data);
 	void disconnect (int id, int err, int sub_err);
 public slots:
-	void begin       ();
+	void start       ();
+	void stop        ();
 	void tick        ();
 	void sendPrivMsg (int id, const QString& target, const QString& msg);
 	void sendRawMsg  (int id, const QString& raw);
@@ -126,6 +127,10 @@ public:
 	QVariant data       (const QModelIndex& idx, int role = Qt::DisplayRole) const override;
 	Qt::ItemFlags flags (const QModelIndex& idx) const override;
 
+	QModelIndex buffer2index (IRCBuffer*);
+
+	void markBufferDirty (IRCBuffer*);
+
 	IRCBuffer* addServer  (const QString& name);
 	IRCBuffer* addChannel (const QString& serv, const QString& chan);
 
@@ -153,6 +158,8 @@ public:
 
 	void add (const QString& nick, IRCPrefix* prefix = nullptr);
 	bool del (const QString& nick);
+
+	void clear();
 
 	static QColor nickColor(const QString& nick);
 
@@ -195,6 +202,7 @@ class IRCAddServerUI : public QDialog {
 	Q_OBJECT;
 public:
 	IRCAddServerUI();
+	void hookStuffUp();
 	Ui::AddServer* ui;
 private:
 	QDataWidgetMapper mapper;
@@ -271,6 +279,11 @@ public:
 	int               serverNameToID (const QString& name);
 	IRCServerDetails* getDetails     (int id);
 
+	IRCServerDetails* getDetailsFromModelIdx(const QModelIndex& idx);
+
+	IRCServerDetails** begin          (void);
+	IRCServerDetails** end            (void);
+
 	int  getOption (IRCOption opt);
 	void setOption (IRCOption opt, int val);
 
@@ -284,4 +297,25 @@ private:
 
 Q_DECLARE_METATYPE(IRCServerDetails);
 
+
+// holds the list of all such current connections.
+
+class IRCConnectionRegistry : public QObject {
+	Q_OBJECT;
+public:
+	IRCConnectionRegistry();
+
+	bool createConnection(int id);
+	bool destroyConnection(int id);
+
+	IRCConnectionInfo* getInfo(int id);
+
+	void setStatus(int id, IRCConnectionStatus status);
+
+signals:
+	void statusChanged(int id, IRCConnectionStatus status);
+private:
+	QThread* irc_thread;
+	std::vector<IRCConnectionInfo> connections;
+};
 #endif

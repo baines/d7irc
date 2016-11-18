@@ -33,6 +33,7 @@ enum IRCOption : int {
 };
 
 enum IRCError : int {
+	IRC_ERR_NONE,
 	IRC_ERR_CREATE_SESSION,
 	IRC_ERR_CONNECT,
 	IRC_ERR_ADD,
@@ -104,7 +105,7 @@ struct IRCBuffer {
 	QTextCursor cursor;
 	IRCUserModel* nicks;
 
-	bool inactive;
+	bool active;
 	IRCBufferLevel level;
 
 	IRCBuffer* parent;
@@ -128,7 +129,7 @@ struct IRCServerDetails {
 	IRCServerDetails() = default;
 	IRCServerDetails(int id);
 
-	int unique_id;
+	int id;
 	QString unique_name;
 
 	QString nickname;
@@ -145,8 +146,6 @@ struct IRCServerDetails {
 	std::vector<IRCChanDetails> chans;
 
 	bool autoconnect;
-
-	IRCConnectionStatus status;
 };
 
 
@@ -156,24 +155,9 @@ struct IRCServerDetails {
 struct IRCConnectionInfo {
 	int id;
 	IRCConnection* conn;
+	IRCConnectionStatus status;
 	QString current_nick;
 	std::vector<IRCPrefix> prefixes;
-};
-
-
-// holds the list of all such current connections.
-
-struct IRCConnectionRegistry {
-	IRCConnectionRegistry();
-
-	bool createConnection(int id);
-	bool destroyConnection(int id);
-
-	IRCConnectionInfo* getInfo(int id);
-
-private:
-	QThread* irc_thread;
-	std::vector<IRCConnectionInfo> connections;
 };
 
 

@@ -34,6 +34,9 @@ IRCAddServerUI::IRCAddServerUI()
 	ui->setupUi(this);
 	setModal(true);
 	ui->chans->setModel(&chan_model);
+}
+
+void IRCAddServerUI::hookStuffUp(){
 
 	// have username / realname mimic nick via placeholder text
 	connect(ui->nick, &QLineEdit::textChanged, [this](){
@@ -67,12 +70,35 @@ IRCAddServerUI::IRCAddServerUI()
 
 	mapper.addMapping(ui->cmds, IRC_DAT_CMDS);
 
+	// server selection change
 	connect(
 		ui->serv_list->selectionModel(), &QItemSelectionModel::currentRowChanged,
 		[this](const QModelIndex& idx, const QModelIndex&){
+
+			// update models
 			mapper.setCurrentIndex(idx.row());
 			auto* vec = SamuraIRC->settings->getChannelDetails(idx);
 			chan_model.setChannels(vec);
+
+			// disable delete button if connected
+			IRCServerDetails*  serv = SamuraIRC->settings->getDetailsFromModelIdx(idx);
+			IRCConnectionInfo* info = SamuraIRC->connections->getInfo(serv->id);
+			ui->btn_delserv->setEnabled(!info);
+
+			// update connect button
+			// TODO: disconnected state probably unnecessary
+			if(!info || info->status == IRC_CON_DISCONNECTED){
+				ui->btn_connect->setText("Connect");
+				ui->btn_connect->setEnabled(true);
+			} else if(info->status == IRC_CON_CONNECTED){
+				ui->btn_connect->setText("Disconnect");
+				ui->btn_connect->setEnabled(true);
+			} else if(info->status == IRC_CON_CONNECTING){
+				// TODO: we might want to be able to disconnect even while the connection
+				// is in progress...
+				ui->btn_connect->setText("Connecting...");
+				ui->btn_connect->setEnabled(false);
+			}
 		}
 	);
 
@@ -88,24 +114,24 @@ IRCAddServerUI::IRCAddServerUI()
 		// TODO: clear all fields if pressed when only one server?
 		if(SamuraIRC->settings->rowCount() > 1){
 			QModelIndex idx = ui->serv_list->currentIndex();
+			IRCServerDetails* serv = SamuraIRC->settings->getDetailsFromModelIdx(idx);
 			SamuraIRC->settings->delServer(idx);
 		}
 	});
 
-	// connect button enable/disable
-	connect(ui->address, &QLineEdit::textChanged, [this](const QString& txt){
-		// TODO: store connected state in the server details,
-		// updated by the IRCConnection
-		if(ui->btn_connect->text() == "Connect"){
-			ui->btn_connect->setEnabled(!txt.isEmpty());
-		}
-	});
-
+	// (dis)connect button
 	connect(ui->btn_connect, &QAbstractButton::clicked, [this](bool){
-		// TODO: get the state from IRCServerDetails, not based on label
-		if(ui->btn_connect->text() == "Connect"){
-			ui->btn_connect->setEnabled(false);
+		auto* serv = SamuraIRC->settings->getDetailsFromModelIdx(ui->serv_list->currentIndex());
+		auto* info = SamuraIRC->connections->getInfo(serv->id);
+
+		if(info){ // disconnect
+			SamuraIRC->connections->destroyConnection(serv->id);
+			ui->btn_connect->setText("Connect");
+			ui->btn_connect->setEnabled(true);
+		} else {  // connect
+			SamuraIRC->connections->createConnection(serv->id);
 			ui->btn_connect->setText("Connecting...");
+			ui->btn_connect->setEnabled(false);
 		}
 	});
 
@@ -138,4 +164,29 @@ IRCAddServerUI::IRCAddServerUI()
 		ui->group_adv->setStyleSheet(on ? "" : "border:none;");
 	});
 	ui->group_adv->setChecked(false);
+
+	// tracking connection changes
+	// TODO: probably should disable all widgets not just connect button
+	connect(
+		SamuraIRC->connections, &IRCConnectionRegistry::statusChanged,
+		[this](int id, IRCConnectionStatus status){
+			auto* serv = SamuraIRC->settings->getDetailsFromModelIdx(ui->serv_list->currentIndex());
+			if(serv->id != id) return;
+
+			ui->btn_connect->setEnabled(status != IRC_CON_CONNECTING);
+			switch(status){
+				case IRC_CON_CONNECTING: {
+					ui->btn_connect->setText("Connecting...");
+				} break;
+				case IRC_CON_CONNECTED: {
+					ui->btn_connect->setText("Disconnect");
+				} break;
+				case IRC_CON_DISCONNECTED: {
+					ui->btn_connect->setText("Connect");
+				} break;
+			}
+		}
+	);
+
+	// TODO: when server name changes, update buffer if it exists
 }

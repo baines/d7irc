@@ -21,13 +21,17 @@ int main(int argc, char** argv){
 	SamuraIRC->connections = new IRCConnectionRegistry;
 
 	SamuraIRC->ui_main->hookStuffUp();
+	SamuraIRC->ui_addserv->hookStuffUp();
 
 	if(SamuraIRC->settings->first_run){
 		SamuraIRC->ui_addserv->open();
+	} else {
+		for(auto* serv : *SamuraIRC->settings){
+			if(serv->autoconnect){
+				SamuraIRC->connections->createConnection(serv->id);
+			}
+		}
 	}
-
-	// TODO: iterate the settings, and create any 'autoconnect' servers
-	SamuraIRC->connections->createConnection(0);
 
 	/*
 	//XXX temp: need server param

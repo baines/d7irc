@@ -78,7 +78,7 @@ QModelIndex IRCBufferModel::parent(const QModelIndex& idx) const {
 	IRCBuffer* buf  = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
 	IRCBuffer* pbuf = buf->parent;
 
-	if(pbuf == root){
+	if(buf == root || pbuf == root){
 		return QModelIndex();
 	}
 
@@ -132,7 +132,7 @@ QVariant IRCBufferModel::data(const QModelIndex& idx, int role) const {
 	switch(role){
 
 		case Qt::DisplayRole: {
-			if(p->inactive){
+			if(!p->active){
 				return QVariant(QString("(%1)").arg(p->name));
 			} else {
 				return QVariant(p->name);
@@ -162,6 +162,28 @@ Qt::ItemFlags IRCBufferModel::flags(const QModelIndex& idx) const {
 	}
 
 	return QAbstractItemModel::flags(idx);
+}
+
+QModelIndex IRCBufferModel::buffer2index(IRCBuffer* buf){
+	if(buf == root) return QModelIndex();
+
+	int row = 0;
+	for(IRCBuffer* p = root->child; p; p = p->sibling, ++row){
+		if(p == buf){
+			return createIndex(row, 0, buf);
+		} else if(p == buf->parent){
+			row = 0;
+			for(IRCBuffer* pp = p->child; pp != buf; pp = pp->sibling, ++row);
+			return createIndex(row, 0, buf);
+		}
+	}
+
+	return QModelIndex();
+}
+
+void IRCBufferModel::markBufferDirty(IRCBuffer* buf){
+	QModelIndex idx = buffer2index(buf);
+	emit dataChanged(idx, idx);
 }
 
 IRCBuffer* IRCBufferModel::addServer(const QString& name){

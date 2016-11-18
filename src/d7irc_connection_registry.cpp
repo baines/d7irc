@@ -24,17 +24,46 @@ bool IRCConnectionRegistry::createConnection(int id){
 	IRCConnectionInfo conn_info = {
 		id,
 		conn,
+		IRC_CON_CONNECTING,
 		details->nickname,
 		default_prefixes
 	};
 	connections.push_back(conn_info);
 
-	// TODO: pass details to begin
-	QMetaObject::invokeMethod(conn, "begin");
+	QMetaObject::invokeMethod(conn, "start");
+
+	IRCBuffer* buf = SamuraIRC->buffers->addServer(details->unique_name);
+	buf->addLine("--", QString("Connecting to %1:%2 %3...").arg(details->hostname).arg(details->port).arg(details->ssl ? "(SSL)" : ""));
+
+	emit statusChanged(id, IRC_CON_CONNECTING);
+	
+	return true;
 }
 
 bool IRCConnectionRegistry::destroyConnection(int id){
+	IRCServerDetails* details = SamuraIRC->settings->getDetails(id);
+	if(!details){
+		return false;
+	}
 
+	IRCConnectionInfo info = {};
+
+	for(int i = 0; i < connections.size(); ++i){
+		if(connections[i].id == id){
+			info = connections[i];
+			connections.erase(connections.begin() + i);
+			break;
+		}
+	}
+
+	if(!info.conn) return false;
+
+	// info.conn is deleted in stop
+	QMetaObject::invokeMethod(info.conn, "stop");
+
+	emit statusChanged(id, IRC_CON_DISCONNECTED);
+
+	return true;
 }
 
 IRCConnectionInfo* IRCConnectionRegistry::getInfo(int id){
@@ -48,4 +77,12 @@ IRCConnectionInfo* IRCConnectionRegistry::getInfo(int id){
 	}
 
 	return nullptr;
+}
+
+void IRCConnectionRegistry::setStatus(int id, IRCConnectionStatus status){
+	auto* info = getInfo(id);
+	if(!info) return;
+
+	info->status = status;
+	emit statusChanged(id, status);
 }

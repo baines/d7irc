@@ -149,3 +149,9 @@ bool IRCUserModel::del(const QString& nick) {
 
 	return false;
 }
+
+void IRCUserModel::clear() {
+	beginResetModel();
+	nicks.clear();
+	endResetModel();
+}

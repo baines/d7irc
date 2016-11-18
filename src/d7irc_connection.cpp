@@ -9,6 +9,7 @@ irc_connect(irc_session_t* s, const char*, const char* origin, const char** argv
 	emit conn->connect(conn->our_id);
 
 	for(const auto& c : conn->details.chans){
+		if(c.name.isEmpty()) continue;
 		// TODO: should these be done more incrementally?
 		irc_cmd_join(s, c.name.toUtf8().constData(), c.pass.isEmpty() ? NULL : c.pass.toUtf8().constData());
 	}
@@ -129,7 +130,7 @@ IRCConnection::IRCConnection(int id, const IRCServerDetails& details, QThread* t
 	this->moveToThread(thread);
 }
 
-void IRCConnection::begin(){
+void IRCConnection::start(){
 
 	irc_session = irc_create_session(&irc_callbacks);
 	if(!irc_session){
@@ -170,6 +171,20 @@ void IRCConnection::begin(){
 	}
 
 	tick();
+}
+
+void IRCConnection::stop(){
+	//TODO: send quit message?
+
+	if(irc_is_connected(irc_session)){
+		irc_disconnect(irc_session);
+	}
+	irc_destroy_session(irc_session);
+	notifiers.clear();
+
+	emit disconnect(our_id, IRC_ERR_NONE, 0);
+
+	delete this;
 }
 
 void IRCConnection::tick(){

@@ -1,7 +1,7 @@
 #include "d7irc_qt.h"
 
 IRCServerDetails::IRCServerDetails(int id)
-: unique_id(id)
+: id(id)
 , unique_name("New Server") // TODO: make it actually unique...
 , nickname()
 , hostname()
@@ -11,7 +11,8 @@ IRCServerDetails::IRCServerDetails(int id)
 , password()
 , nickserv()
 , commands()
-, chans() {
+, chans()
+, autoconnect(false) {
 
 }
 
@@ -230,6 +231,9 @@ void IRCSettings::delServer(const QModelIndex& i){
 	endRemoveRows();
 }
 
+IRCServerDetails* IRCSettings::getDetailsFromModelIdx(const QModelIndex& i){
+	return servers[i.row()];
+}
 
 std::vector<IRCChanDetails>* IRCSettings::getChannelDetails(const QModelIndex& idx){
 	return &servers[idx.row()]->chans;
@@ -242,7 +246,7 @@ int IRCSettings::serverNameToID(const QString& name){
 
 IRCServerDetails* IRCSettings::getDetails(int id){
 	for(auto* s : servers){
-		if(s->unique_id == id){
+		if(s->id == id){
 			return s;
 		}
 	}
@@ -256,4 +260,12 @@ int getOption(IRCOption opt){
 
 void setOption(IRCOption opt, int val){
 
+}
+
+IRCServerDetails** IRCSettings::begin(){
+	return servers.data();
+}
+
+IRCServerDetails** IRCSettings::end(){
+	return servers.data() + servers.size();
 }
