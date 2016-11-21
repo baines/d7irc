@@ -76,34 +76,48 @@ void IRCMessageHandler::handleIRCQuit(int id, const QString& user, const QString
 }
 
 void IRCMessageHandler::handleIRCNick(int id, const QString& user, const QString& new_nick){
-	const auto& serv = serv_id2name(id);
+	IRCServerDetails&  serv = *SamuraIRC->servers->getDetails(id);
+	IRCConnectionInfo& info = *SamuraIRC->connections->getInfo(id);
 
-	IRCBuffer* buf = SamuraIRC->buffers->addServer(serv);
+	IRCBuffer* buf = SamuraIRC->buffers->addServer(serv.unique_name);
 
 	char old_nick[1024];
 	irc_target_get_nick(user.toUtf8().constData(), old_nick, sizeof(old_nick));
 
+	bool self_change = false;
+
+	if(info.current_nick == old_nick){
+		self_change = true;
+		info.current_nick = new_nick;
+	}
+
 	for(IRCBuffer* chan = buf->child; chan; chan = chan->sibling){
 		if(chan->nicks->del(user)){
 			chan->nicks->add(new_nick);
-			QString msg = QString(old_nick) + " is now known as " + new_nick;
+			QString msg;
+
+			if(self_change){
+				msg = QString("You are now known as %1").arg(new_nick);
+			} else {
+				msg = QString(old_nick) + " is now known as " + new_nick;
+			}
 			chan->addLine("--", msg);
 		}
 	}
 }
 
 void IRCMessageHandler::handleIRCPrivMsg(int id, const QString& from, const QString& to, const QString& msg){
-	const auto& serv = serv_id2name(id);
+	IRCServerDetails&  serv = *SamuraIRC->servers->getDetails(id);
+	IRCConnectionInfo& info = *SamuraIRC->connections->getInfo(id);
 
 	IRCBuffer* buf;
 	char nick[1024];
 	irc_target_get_nick(from.toUtf8().constData(), nick, sizeof(nick));
 
-	//FIXME: real nick
-	if(to == "d12ninja"){
-		buf = SamuraIRC->buffers->addChannel(serv, nick);
+	if(to == info.current_nick){
+		buf = SamuraIRC->buffers->addChannel(serv.unique_name, nick);
 	} else {
-		buf = SamuraIRC->buffers->addChannel(serv, to);
+		buf = SamuraIRC->buffers->addChannel(serv.unique_name, to);
 	}
 
 	buf->addLine(nick, msg);
@@ -205,8 +219,6 @@ void IRCMessageHandler::handleIRCDisconnect(int id, int err, int sub_err){
 void IRCMessageHandler::sendIRCMessage(const QString& str){
 	QModelIndex idx = SamuraIRC->ui_main->ui->buffer_list->currentIndex();
 	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
-	
-	// TODO: get active server buffer -> translate to id
 
 	switch(buf->type){
 		case IRC_BUF_INTERNAL: {
@@ -218,22 +230,56 @@ void IRCMessageHandler::sendIRCMessage(const QString& str){
 		} break;
 
 		case IRC_BUF_CHANNEL: {
+			IRCBuffer* sbuf = buf->parent;
+			int id = SamuraIRC->servers->serverNameToID(sbuf->name);
+			if(id == -1){
+				// XXX: -1 here actually means the server doesn't exist... that shouldn't happen
+				buf->addLine("--", "Not connected!");
+				break;
+			}
+
+			IRCConnectionInfo* info = SamuraIRC->connections->getInfo(id);
+			if(!info){
+				buf->addLine("--", "Not connected!");
+				break;
+			}
+
 			puts("sending");
-			emit dispatchPrivMsg(0, buf->name, str);
+			emit dispatchPrivMsg(id, buf->name, str);
 
 			if(str.startsWith("\001ACTION ")){
-				//TODO: real nick
-				buf->addLine("*", QString("d12ninja ") + str.mid(8, str.size() - 9));
+				buf->addLine("*", info->current_nick + " " + str.mid(8, str.size() - 9));
 			} else {
-				//TODO: real nick
-				buf->addLine("d12ninja", str);
+				buf->addLine(info->current_nick, str);
 			}
 		} break;
 	}
 }
 
-// TODO: lookup current server
 void IRCMessageHandler::sendIRCCommand(const QString& cmd){
+	QModelIndex idx = SamuraIRC->ui_main->ui->buffer_list->currentIndex();
+	IRCBuffer* buf = reinterpret_cast<IRCBuffer*>(idx.internalPointer());
+	int id = -1;
+	
+	// TODO: write a proper command handling system
+
+	switch(buf->type){
+		case IRC_BUF_INTERNAL: {
+			buf->addLine("--", "Can't do that here.");
+		} break;
+
+		case IRC_BUF_SERVER: {
+			id = SamuraIRC->servers->serverNameToID(buf->name);
+		} break;
+
+		case IRC_BUF_CHANNEL: {
+			id = SamuraIRC->servers->serverNameToID(buf->parent->name);
+		} break;
+	}
+
+	if(id == -1){
+		return;
+	}
 
 	if(cmd.startsWith("me ", Qt::CaseInsensitive)){
 
@@ -243,6 +289,7 @@ void IRCMessageHandler::sendIRCCommand(const QString& cmd){
 	} else if(cmd.startsWith("msg ", Qt::CaseInsensitive)){
 
 		QStringList list = cmd.split(" ");
+
 		if(list.size() >= 3){
 			list.removeFirst();
 			QString to  = list[0];
@@ -250,13 +297,11 @@ void IRCMessageHandler::sendIRCCommand(const QString& cmd){
 
 			QString msg = QString("PRIVMSG %1 :%2").arg(to).arg(list.join(" "));
 
-			// TODO: real id
-			emit dispatchRawMsg(0, msg);
+			emit dispatchRawMsg(id, msg);
 		}
 
 	} else {
-		// TODO: real id
-		emit dispatchRawMsg(0, cmd);
+		emit dispatchRawMsg(id, cmd);
 	}
 }
 

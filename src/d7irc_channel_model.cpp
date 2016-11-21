@@ -46,9 +46,12 @@ bool IRCChannelModel::setData(const QModelIndex& idx, const QVariant& val, int r
 
 	if(idx.column() == 0){
 		c[idx.row()].name = val.toString();
+		// TODO: sort when this changes?
 	} else {
 		c[idx.row()].pass = val.toString();
 	}
+
+	emit dataChanged(idx, idx);
 
 	return true;
 }
@@ -74,5 +77,12 @@ void IRCChannelModel::pop(void){
 	if(!chans) return;
 	beginRemoveRows(QModelIndex(), chans->size()-1, chans->size()-1);
 	chans->pop_back();
+	endRemoveRows();
+}
+
+void IRCChannelModel::remove(int row){
+	if(!chans) return;
+	beginRemoveRows(QModelIndex(), row, row);
+	chans->erase(chans->begin() + row);
 	endRemoveRows();
 }

@@ -188,6 +188,7 @@ public:
 
 	void push();
 	void pop();
+	void remove(int row);
 
 	void setChannels(std::vector<IRCChanDetails>* chans);
 

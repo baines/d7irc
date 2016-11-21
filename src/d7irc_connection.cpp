@@ -8,6 +8,10 @@ irc_connect(irc_session_t* s, const char*, const char* origin, const char** argv
 	IRCConnection* conn = static_cast<IRCConnection*>(irc_get_ctx(s));
 	emit conn->connect(conn->our_id);
 
+	if(!conn->details.nickserv.isEmpty()){
+		irc_cmd_msg(s, "nickserv", conn->details.nickserv.toUtf8().constData());
+	}
+
 	for(const auto& c : conn->details.chans){
 		if(c.name.isEmpty()) continue;
 		// TODO: should these be done more incrementally?
@@ -126,6 +130,9 @@ IRCConnection::IRCConnection(int id, const IRCServerDetails& details, QThread* t
 	QObject::connect(this, &IRCConnection::numeric, handler, &IRCMessageHandler::handleIRCNumeric, Qt::QueuedConnection);
 
 	QObject::connect(this, &IRCConnection::disconnect, handler, &IRCMessageHandler::handleIRCDisconnect, Qt::QueuedConnection);
+
+	QObject::connect(handler, &IRCMessageHandler::dispatchPrivMsg, this, &IRCConnection::sendPrivMsg, Qt::QueuedConnection);
+	QObject::connect(handler, &IRCMessageHandler::dispatchRawMsg , this, &IRCConnection::sendRawMsg , Qt::QueuedConnection);
 
 	this->moveToThread(thread);
 }

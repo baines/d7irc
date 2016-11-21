@@ -51,6 +51,8 @@ IRCServerModel::IRCServerModel()
 
 		serv->autoconnect = settings.value("autoconnect", false).toBool();
 
+		serv->order = settings.value("order", 0).toInt();
+
 		int nchans = settings.beginReadArray("channels");
 		for(int i = 0; i < nchans; ++i){
 			settings.setArrayIndex(i);
@@ -70,6 +72,10 @@ IRCServerModel::IRCServerModel()
 		servers.push_back(serv);
 	}
 
+	std::sort(servers.begin(), servers.end(), [](const IRCServerDetails* a, const IRCServerDetails* b){
+		return a->order < b->order;
+	});
+
 }
 
 IRCServerModel::~IRCServerModel(){
@@ -82,6 +88,7 @@ IRCServerModel::~IRCServerModel(){
 		file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 	}
 
+	int i = 0;
 	for(auto* s : servers){
 		settings.beginGroup("serv." + s->unique_name);
 
@@ -97,6 +104,10 @@ IRCServerModel::~IRCServerModel(){
 		settings.setValue("password", s->password);
 		settings.setValue("nickserv", s->nickserv);
 		settings.setValue("commands", s->commands);
+		
+		settings.setValue("autoconnect", s->autoconnect);
+
+		settings.setValue("order", i);
 
 		settings.beginWriteArray("channels");
 		for(int i = 0; i < s->chans.size(); ++i){
@@ -112,6 +123,8 @@ IRCServerModel::~IRCServerModel(){
 		}
 		settings.endArray();
 		settings.endGroup();
+
+		++i;
 	}
 
 }
@@ -224,6 +237,8 @@ bool IRCServerModel::setData(const QModelIndex& idx, const QVariant& val, int ro
 		default: return false;
 	}
 
+	emit dataChanged(idx, idx);
+
 	return true;
 }
 
@@ -312,8 +327,14 @@ std::vector<IRCChanDetails>* IRCServerModel::getChannelDetails(const QModelIndex
 	return &servers[idx.row()]->chans;
 }
 
-
+// TODO: probably shouldn't be needed, store ID in buffers instead?
 int IRCServerModel::serverNameToID(const QString& name){
+	for(auto* s : servers){
+		if(s->unique_name == name){
+			return s->id;
+		}
+	}
+
 	return -1;
 }
 

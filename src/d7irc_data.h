@@ -148,6 +148,9 @@ struct IRCServerDetails {
 	std::vector<IRCChanDetails> chans;
 
 	bool autoconnect;
+
+	// only used when loading, to sort the list view
+	int order;
 };
 
 
@@ -160,6 +163,9 @@ struct IRCConnectionInfo {
 	IRCConnectionStatus status;
 	QString current_nick;
 	std::vector<IRCPrefix> prefixes;
+
+	// TODO: add hostmask etc
+
 };
 
 

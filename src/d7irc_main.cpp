@@ -33,12 +33,6 @@ int main(int argc, char** argv){
 		}
 	}
 
-	/*
-	//XXX temp: need server param
-	QObject::connect(&handler, &IRCMessageHandler::tempSend   , connection, &IRCConnection::sendPrivmsg, Qt::QueuedConnection);
-	QObject::connect(&handler, &IRCMessageHandler::tempSendRaw, connection, &IRCConnection::sendRaw    , Qt::QueuedConnection);
-	*/
-
 	SamuraIRC->ui_main->show();
 
 	int ret = app.exec();

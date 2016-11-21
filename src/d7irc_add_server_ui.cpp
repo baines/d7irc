@@ -152,7 +152,7 @@ void IRCAddServerUI::hookStuffUp(){
 	auto* delegate = new IRCChanPassDelegate;
 	ui->chans->setItemDelegate(delegate);
 
-	// TODO: on edit finished, sort channels / handle deletion of blank rows?
+	// handle adding / removing rows in the channel table
 	connect(delegate, &IRCChanPassDelegate::updated, [this](const QModelIndex& idx, const QString& txt){
 		auto* model = qobject_cast<IRCChannelModel*>(ui->chans->model());
 		assert(model);
@@ -161,6 +161,15 @@ void IRCAddServerUI::hookStuffUp(){
 			model->push();
 		} else if(txt.isEmpty() && idx.row() == model->rowCount()-2){
 			model->pop();
+		}
+	});
+
+	connect(&chan_model, &QAbstractItemModel::dataChanged, [this](const QModelIndex& idx, const QModelIndex&){
+		QString name = chan_model.data(chan_model.index(idx.row(), 0), Qt::EditRole).toString();
+		QString pass = chan_model.data(chan_model.index(idx.row(), 1), Qt::EditRole).toString();
+
+		if(name.isEmpty() && pass.isEmpty() && idx.row() != (chan_model.rowCount() - 1)){
+			chan_model.remove(idx.row());
 		}
 	});
 
